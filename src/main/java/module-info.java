@@ -7,9 +7,11 @@ module dealerproject {
     requires json.simple;
     requires java.desktop;
     requires kotlin.stdlib;
-    requires java.base;
+    // requires java.base;
 
-    opens javafiles.gui to javafx.fxml;
+    opens dealerproject to javafx.graphics, javafx.fxml; // Allow access to HelloApplication
+    exports dealerproject;
+
+    opens javafiles.gui to javafx.fxml; // Allow access to FXML files in the gui package
     exports javafiles.gui;
-    opens javafiles.domainfiles to javafx.base;//, org.mockito;
 }
