@@ -24,8 +24,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 application {
-    mainModule = 'dealerproject'
-    mainClass = 'dealerproject.HelloApplication'
+    mainModule = 'javafiles'
+    mainClass = 'javafiles.gui.DealershipApp'
 }
 
 kotlin {

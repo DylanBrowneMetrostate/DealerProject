@@ -1,14 +1,14 @@
 package javafiles.gui;
 
-/*
+
 import javafiles.dataaccessfiles.FileIOBuilder;
-import javafiles.domainfiles.Company; */
+import javafiles.domainfiles.Company;
 import javafx.application.Application;
-import javafx.stage.Stage;/*
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 import static javafiles.gui.FXMLPath.MAIN_SCREEN;
- */
-
 
 /**
  * The main application class for the Dealership application.
@@ -19,15 +19,15 @@ public class DealershipApp extends Application {
 /**
      * Called when the application is stopped.
      * Writes the current inventory data to a file using {@link AppStateManager#writeToInventory()}.
-     *//*
+     */
 
     @Override
     public void stop() {
         AppStateManager.writeToInventory();
     }
 
-    */
-/**
+
+    /**
      * Called when the application is started.
      * Initializes the Company instance, loads initial data, and displays the main screen.
      *
@@ -37,8 +37,8 @@ public class DealershipApp extends Application {
      */
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        /*
+    public void start(Stage primaryStage) throws IOException {
+
         // create and intialize company instance
         Company company = new Company();
 
@@ -52,7 +52,7 @@ public class DealershipApp extends Application {
 
         AppStateManager.loadInitialFiles();
 
-         */
+
     }
 
 
@@ -63,6 +63,6 @@ public class DealershipApp extends Application {
      */
     public static void main(String[] args) {
         System.out.println("Hello World!");
-        //launch(args);
+        launch(args);
     }
 }
