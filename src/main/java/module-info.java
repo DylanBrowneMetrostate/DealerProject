@@ -1,4 +1,4 @@
-module dealerproject {
+module javafiles {
     requires javafx.controls;
     requires javafx.fxml;
 
@@ -9,9 +9,8 @@ module dealerproject {
     requires kotlin.stdlib;
     requires java.base;
 
-    opens dealerproject to javafx.graphics, javafx.fxml; // Allow access to HelloApplication
-    exports dealerproject;
-
     opens javafiles.gui to javafx.fxml; // Allow access to FXML files in the gui package
     exports javafiles.gui;
+
+    opens javafiles.domainfiles to javafx.base;
 }
