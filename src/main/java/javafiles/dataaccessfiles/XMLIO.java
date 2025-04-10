@@ -52,7 +52,7 @@ enum XMLKey {
  *
  * @author Dylan Browne
  */
-class XMLIO extends FileIO {
+class XMLIO extends FileIO implements FileIOReader {
     /**
      * Creates or opens an XML file with name path in read ('r') or write ('w') mode.
      * Read mode allows the reading, but not writing of files, write mode allows for the
@@ -62,7 +62,7 @@ class XMLIO extends FileIO {
      *
      * @param path The full path of the file to be opened or created.
      * @param mode A char representation of the type of file this is (read 'r' or write 'w')
-     * @throws ReadWriteException if the mode is an invalid char or the file is recognized as pom.xml
+     * @throws ReadWriteException Thrown if the mode is an invalid char
      */
     public XMLIO(String path, char mode) throws ReadWriteException {
         super(path, mode);
@@ -110,7 +110,8 @@ class XMLIO extends FileIO {
                     }
                 }
                 if (map.containsKey(key.getKey()) && !map.get(key.getKey()).equals(nodeValCast)) {
-                    String reason = "[" + map.get(key.getKey()) + "] != [" + nodeValue + "].";
+                    String reason = "Key " + key.getName() + " already has a value and [";
+                    reason += map.get(key.getKey()) + "] != [" + nodeValue + "].";
                     DuplicateKeyException cause = new DuplicateKeyException(reason);
                     XMLKey.REASON.getKey().putValid(map, new ReadWriteException(cause));
                     return;
@@ -190,6 +191,21 @@ class XMLIO extends FileIO {
         }
     }
 
+    /*
+     * So long as the tag is in the correct region, tags within tags is fine.
+     * It is possible to parse values from a String with a tag within that
+     * String (though it has a possibility of white space errors).
+     *
+     * Region: <Any Tag Name> -> <Dealer>
+     * Tag / Attributes: None
+     *
+     * Region: <Dealer> -> <Vehicle>
+     * Tag / Attributes: ID, Name
+     *
+     * Region: <Vehicle> -> <Rest of the Tags>
+     * Tag / Attributes: ID, Type, Unit, Price, Make, Model
+     */
+
     /**
      * Parses the given {@link Document} in order to return a {@link List} of
      * {@link Map}<{@link Key}, {@link Object}>s where each {@link Map} corresponds to the info
@@ -199,7 +215,7 @@ class XMLIO extends FileIO {
      * is added instead.
      *
      * @param document The {@link Document} that is being parsed.
-     * @return a {@link List}<{@link Map}>s where each {@link Map} corresponds to a single Vehicle.
+     * @return a {@link List}<{@link Map}> where each {@link Map} corresponds to a single Vehicle.
      */
     private List<Map<Key, Object>> parseDocument(Document document) {
         List<Map<Key, Object>> maps = new ArrayList<>();
@@ -234,7 +250,7 @@ class XMLIO extends FileIO {
     /**
      * Reads and returns the data stored in the file of this object.
      *
-     * @return A List of {@link Map}<{@link Key}, {@link Object}>s that correspond to the
+     * @return A List of Map<Key, Object>s that correspond to the
      *         data stored in the XML file for this object.
      * @throws ReadWriteException Thrown if not in read ('r') mode.
      */
@@ -255,16 +271,5 @@ class XMLIO extends FileIO {
         }
 
         return parseDocument(document);
-    }
-
-    /**
-     * Throws a {@link ReadWriteException} as {@link XMLIO} can not be used to write to files.
-     * Overrides {@link FileIO} abstract method.
-     *
-     * @param maps Discarded.
-     * @throws ReadWriteException Always thrown.
-     */
-    public void writeInventory(List<Map<Key, Object>> maps) throws ReadWriteException {
-        throw new ReadWriteException("Can not write to XML Files.");
     }
 }

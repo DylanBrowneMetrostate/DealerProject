@@ -1,4 +1,4 @@
-package javafiles.dataaccessfilesTEMP;
+package javafiles.dataaccessfiles;
 
 import javafiles.customexceptions.BadExtensionException;
 import javafiles.customexceptions.PathNotFoundException;
@@ -135,7 +135,7 @@ public class FileIOFactory {
         throw new ReadWriteException(cause);
     }
 
-    public FileIOReader buildNewFileIoReader(String path) throws ReadWriteException {
+    public static FileIOReader buildNewFileIOReader(String path) throws ReadWriteException {
         char mode = 'r';
         File file = new File(path);
         if (!file.exists()) {
@@ -150,7 +150,7 @@ public class FileIOFactory {
         }
     }
 
-    public FileIOWriter buildNewFileIoWriter(String path)  throws ReadWriteException {
+    public static FileIOWriter buildNewFileIOWriter(String path)  throws ReadWriteException {
         try {
             return (FileIOWriter) buildNewFileIO(path, 'w');
         } catch (ClassCastException e) {

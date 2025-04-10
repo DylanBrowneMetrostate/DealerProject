@@ -1,6 +1,6 @@
 package javafiles.gui
 
-import javafiles.dataaccessfiles.FileIOBuilder
+import javafiles.dataaccessfiles.FileIOFactory
 import javafiles.domainfiles.Company
 import javafx.application.Application
 import javafx.stage.Stage
@@ -44,7 +44,7 @@ class DealershipAppTemp() : Application() {
 
         AppStateManager.initializeCompany(company)
 
-        FileIOBuilder.setupFileIOBuilders()
+        FileIOFactory.setupFileIOBuilders()
 
         val sceneManger = SceneManager.getInstance(primaryStage)
         sceneManger.switchScene(FXMLPath.MAIN_SCREEN)

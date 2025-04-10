@@ -2,8 +2,9 @@ package javafiles.gui;
 
 import javafiles.Key;
 import javafiles.customexceptions.*;
-import javafiles.dataaccessfiles.FileIO;
-import javafiles.dataaccessfiles.FileIOBuilder;
+import javafiles.dataaccessfiles.FileIOFactory;
+import javafiles.dataaccessfiles.FileIOReader;
+import javafiles.dataaccessfiles.FileIOWriter;
 import javafiles.domainfiles.Company;
 import javafiles.domainfiles.Dealership;
 import javafiles.domainfiles.Vehicle;
@@ -155,9 +156,9 @@ public class AppStateManager {
      */
     protected static void loadInitialFiles() {
         try {
-            FileIO fileIO = FileIOBuilder.buildNewFileIO(masterInventoryList, 'r');
+            FileIOReader fileIOReader = FileIOFactory.buildNewFileIOReader(masterInventoryList);
 
-            List<Map<Key, Object>> maps = fileIO.readInventory();
+            List<Map<Key, Object>> maps = fileIOReader.readInventory();
             List<Map<Key, Object>> badDataMaps = company.dataToInventory(maps);
 
             if (!badDataMaps.isEmpty()) {GuiUtility.showMapTables(maps, badDataMaps);}
@@ -176,7 +177,7 @@ public class AppStateManager {
     protected static void writeToInventory() {
         List<Map<Key, Object>> data = company.getDataMap();
         try {
-            FileIO fileIO = FileIOBuilder.buildNewFileIO(masterInventoryList, 'w');
+            FileIOWriter fileIO = FileIOFactory.buildNewFileIOWriter(masterInventoryList);
             fileIO.writeInventory(data);
         } catch (ReadWriteException e) {
             JOptionPane.showMessageDialog(null, "Inventory could not be written.");

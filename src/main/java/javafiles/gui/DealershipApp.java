@@ -1,7 +1,7 @@
 package javafiles.gui;
 
 
-import javafiles.dataaccessfiles.FileIOBuilder;
+import javafiles.dataaccessfiles.FileIOFactory;
 import javafiles.domainfiles.Company;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -44,7 +44,7 @@ public class DealershipApp extends Application {
 
         AppStateManager.initializeCompany(company);
 
-        FileIOBuilder.setupFileIOBuilders();
+        FileIOFactory.setupFileIOBuilders();
 
         SceneManager sceneManger = SceneManager.getInstance(primaryStage);
         sceneManger.switchScene(MAIN_SCREEN);

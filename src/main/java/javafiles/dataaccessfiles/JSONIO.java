@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author Dylan Browne
  */
-class JSONIO extends FileIO {
+class JSONIO extends FileIO implements FileIOWriter, FileIOReader {
     /**
      * Creates or opens a JSON file with name filePath in read ('r') or write ('w') mode.
      * Read mode allows the reading, but not writing of files, write mode allows for the
@@ -33,22 +33,21 @@ class JSONIO extends FileIO {
     }
 
     /**
-     * Takes a {@link JSONObject} and creates and returns a {@link Map}. Fills the {@link Map}
-     * with the data from the {@link JSONObject} with the keys equal to {@link Key}.getKey().
+     * Takes a JSONObject and creates and returns a Map. Fills the Map with the
+     * data from the JSONObject with the same keys as keys. If any keys are absent,
+     * null is returned.
      *
-     * @param jObj The {@link JSONObject}  that data is being extracted from.
-     * @return A {@link Map} of all the key-value pairs found in the object.
+     * @param jObj The JSONObject that data is being extracted from.
      */
     private Map<Key, Object> readJSONObject(JSONObject jObj) {
         Map<Key, Object> map = new HashMap<>();
 
         for (Key key : Key.values()) {
-            Object dataPoint = jObj.get(key.getKey());
+            String keyStr = key.getKey();
+
+            Object dataPoint = jObj.get(keyStr);
             if (dataPoint == null) {continue;}
-            if (!key.putValid(map, dataPoint)) {
-                ReadWriteException exception = new ReadWriteException("Unknown");
-                Key.REASON_FOR_ERROR.putValid(map, exception);
-            }
+            map.put(key, dataPoint);
 
         }
         return map;
@@ -57,8 +56,9 @@ class JSONIO extends FileIO {
     /**
      * Reads and returns the data stored in the file of this object.
      *
-     * @return A {@link List} of {@link Map}<{@link Key}, {@link Object}>s that correspond
-     *         to the {@link JSONArray} of data stored in the JSON file for this object.
+     * @return A List of Map<Key, Object>s that correspond to the
+     *         JSONArray of data stored in the JSON file for this object.
+     *         The Map has data in the same keys as keys.
      * @throws ReadWriteException Thrown if not in read ('r') mode.
      */
     public List<Map<Key, Object>> readInventory() throws ReadWriteException {
@@ -74,7 +74,7 @@ class JSONIO extends FileIO {
             jFile = (JSONObject) parser.parse(fileReader);
             fileReader.close();
         } catch (ParseException | IOException e) {
-            throw new ReadWriteException(e);
+            return new ArrayList<>();
         }
 
         jArray = (JSONArray)jFile.get("car_inventory");
@@ -90,12 +90,12 @@ class JSONIO extends FileIO {
     }
 
     /**
-     * Takes a {@link Map}<{@link Key}, {@link Object}> of data and converts it to a {@link JSONObject}
-     * where {@link Key}.getKey() corresponds to the key in the {@link JSONObject}.
+     * Takes a Map<Key, Object> of data with the same keys as keys
+     * and converts it to a JSONObject and returns it.
      *
-     * @param data The {@link Map} of items to be ordered in a {@link JSONObject} where
-     *             {@link Key}.getKey() corresponds to the key in the created {@link JSONObject}.
-     * @return The newly created {@link JSONObject}.
+     * @param data The Map of items to be ordered in a JSONObject with the keys for
+     *             the data the same as the keys in keys.
+     * @return The newly created JSONObject
      */
     private JSONObject makeJSONObject(Map<Key, Object> data) {
         JSONObject jObj = new JSONObject();
@@ -108,9 +108,9 @@ class JSONIO extends FileIO {
     }
 
     /**
-     * Takes a {@link List} of {@link Map}s to write to the file stored in this object.
+     * Takes a List of Maps to write to the file stored in this object.
      *
-     * @param data {@link List} of {@link Map}s to write to a file.
+     * @param data List of Maps to write to a file.
      * @throws ReadWriteException Thrown if not in write ('w') mode.
      */
     public void writeInventory(List<Map<Key, Object>> data) throws ReadWriteException {
