@@ -1,35 +1,63 @@
-package javafiles.domainfiles;
+package javafiles.domainfiles
 
-import javafiles.Key;
-import javafiles.customexceptions.InvalidAcquisitionDateException;
-import javafiles.customexceptions.RentalException;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Map;
+import javafiles.Key
+import javafiles.customexceptions.InvalidAcquisitionDateException
+import javafiles.customexceptions.RentalException
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
- Vehicle is an abstract class that defines a set of common attributes
- and behaviors for all vehicle types. This class serves as a blueprint for any
- specific vehicle types that may extend it
-
- @author Christopher Engelhart
+ * Vehicle is an abstract class that defines a set of common attributes
+ * and behaviors for all vehicle types. This class serves as a blueprint for any
+ * specific vehicle types that may extend it.
+ *
+ * @author Christopher Engelhart
  */
+abstract class Vehicle(
+    /**
+     * The specific type of the vehicle (e.g., SUV, Sedan, Pickup, Sports Car).
+     */
+    val vehicleType: String,
+    /**
+     * The unique identifier for the vehicle.
+     */
+    var vehicleId: String,
+    /**
+     * The model name of the vehicle.
+     */
+    var vehicleModel: String,
+    /**
+     * The price of the vehicle.
+     */
+    var vehiclePrice: Long,
+    /**
+     * The rental strategy used for this vehicle. Defaults to [DefaultRentalStrategy].
+     */
+    var rentalStrategy: RentalStrategy = DefaultRentalStrategy()
+) {
+    /**
+     * The name of the vehicle's manufacturer. Defaults to "Unknown".
+     */
+    var vehicleManufacturer: String = "Unknown"
 
+    /**
+     * The unit of currency for the vehicle's price. Defaults to "dollars".
+     */
+    var priceUnit: String = "dollars"
 
-public abstract class Vehicle {
-    private String vehicleId;
-    private String vehicleManufacturer;
-    private String vehicleModel;
-    private Long vehiclePrice;
-    private String priceUnit;
-    private Long acquisitionDate;
-    private final String vehicleType; // Common field to all vehicle
-    private boolean rental;
-    private final RentalStrategy rentalStrategy;
+    /**
+     * The acquisition date of the vehicle as a Unix timestamp (milliseconds since epoch).
+     * Can be null if the acquisition date is not yet set.
+     */
+    var acquisitionDate: Long? = null
+
+    /**
+     * Indicates whether the vehicle is currently rented.
+     */
+    var rentalStatus: Boolean = false
+        private set
 
     /**
      * Constructor method to be used by Vehicle's child classes
@@ -38,182 +66,98 @@ public abstract class Vehicle {
      * @param type the specific vehicle type that the extending class is
      * @param id The vehicle ID of the Vehicle
      */
-    public Vehicle(String type, String id, String model, Long price) {
-        this(type, id, model, price, new DefaultRentalStrategy());
+    constructor(type: String, id: String, model: String, price: Long) :
+            this(type, id, model, price, DefaultRentalStrategy())
+
+
+    init {
+        require(vehicleId.isNotBlank()) { "Vehicle ID cannot be blank" }
+        require(vehicleModel.isNotBlank()) { "Vehicle model cannot be blank" }
+        require(vehiclePrice >= 0) { "Vehicle price cannot be negative" }
     }
-
-    /**
-     * Constructor method to be used by Vehicle's child classes
-     * to specify the children's vehicle type with  a specified rental strategy
-     *
-     *
-     * @param type the specific vehicle type that the extending class is
-     * @param id The vehicle ID of the Vehicle
-     * @param strategy the rental strategy used for this vehicle
-     */
-    public Vehicle(String type, String id, String model, Long price, RentalStrategy strategy) {
-        // necessary
-        vehicleType = type;
-        vehicleId = id;
-        vehicleModel = model;
-        vehiclePrice = price;
-        rentalStrategy = strategy;
-
-        // defaults
-        vehicleManufacturer = "Unknown";
-        rental = false;
-        priceUnit = "dollars";
-        acquisitionDate = null;
-    }
-
-    /**
-     * Sets the vehicle ID.
-     *
-     * @param vehicleId the unique identifier for the vehicle
-     */
-    public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
-    }
-
-    /**
-     * Sets the vehicle manufacturer.
-     *
-     * @param vehicleManufacturer the name of the vehicle's manufacturer
-     */
-    public void setVehicleManufacturer(String vehicleManufacturer) {
-        this.vehicleManufacturer = vehicleManufacturer;
-    }
-
-    /**
-     * Sets the vehicle model.
-     *
-     * @param vehicleModel the model name or number of the vehicle
-     */
-    public void setVehicleModel(String vehicleModel) {
-        this.vehicleModel = vehicleModel;
-    }
-
-    /**
-     * Sets the vehicle price.
-     *
-     * @param vehiclePrice the price of the vehicle
-     */
-    public void setVehiclePrice(Long vehiclePrice) {
-        this.vehiclePrice = vehiclePrice;
-    }
-
-    /**
-     * Sets the acquisition date of the vehicle.
-     *
-     * @param acquisitionDate the date the vehicle was acquired
-     */
-    public void setAcquisitionDate(Long acquisitionDate) { this.acquisitionDate = acquisitionDate;
-    }
-
 
     /**
      * Sets the rental state of the vehicle object.
      *
-     * @param state {@code true} vehicle is currently rented, {@code false} vehicle is no longer rented
-     *                          and is available for sale
+     * @param state `true` if the vehicle is currently rented, `false` if the vehicle is no longer rented
+     * and is available.
      */
-    public void setRental(boolean state) {this.rental = state;}
-
-    public void setPriceUnit(String unit) {priceUnit = unit;}
-
-    /**
-     * Enables rental, (vehicle is now rented) using the configured rental strategy.
-     *
-     * @throws RentalException If an error occurs during the rental enabling process.
-     */
-    public void enableRental() throws RentalException
-    {
-        rentalStrategy.enableRental(this);
-
+    fun setRental(state: Boolean) {
+        rentalStatus = state
     }
 
     /**
-     * Disables rentals (vehicle is no longer rented, and is available for sale)
-     * using the configured rental strategy.
+     * Enables rental for this vehicle using the configured [rentalStrategy].
      *
-     * @throws RentalException If an error occurs during the rental disabling process.
+     * @throws RentalException If an error occurs during the rental enabling process as defined by the strategy.
      */
-    public void disableRental() throws RentalException
-    {
-        rentalStrategy.disableRental(this);
+    @Throws(RentalException::class)
+    fun enableRental() {
+        rentalStrategy.enableRental(this)
     }
 
-    // Getter methods for shared attributes
-    public String getVehicleId() {return vehicleId;}
-    public String getVehicleManufacturer() {return vehicleManufacturer;}
-    public String getVehicleModel() {return vehicleModel;}
-    public Long getVehiclePrice() {return vehiclePrice;}
-    public Long getAcquisitionDate() {return acquisitionDate;}
-    public String getVehicleType() {return vehicleType;}
-    public boolean getRentalStatus() { return rental; }
-    public String getPriceUnit() {return priceUnit;}
-
+    /**
+     * Disables rental for this vehicle using the configured [rentalStrategy].
+     *
+     * @throws RentalException If an error occurs during the rental disabling process as defined by the strategy.
+     */
+    @Throws(RentalException::class)
+    fun disableRental() {
+        rentalStrategy.disableRental(this)
+    }
 
     /**
      * Gets the acquisition date formatted as a String in "MM/dd/yyyy" format.
-     * If the acquisition date null or if its en empty string "", an empty String
-     * returned.
+     * If the acquisition date is null, an empty String is returned.
      *
-     * @return The formatted acquisition date String
-     * @throws InvalidAcquisitionDateException if the acquisitionDate is null or an invalid epoch time.
+     * @return The formatted acquisition date String, or an empty String if the acquisition date is null.
+     * @throws InvalidAcquisitionDateException if the [acquisitionDate] is not null but represents an invalid epoch time.
      */
-    public String getFormattedAcquisitionDate() throws InvalidAcquisitionDateException {
-        if (acquisitionDate == null) {
-            return "";
-        }
-        try {
-            LocalDate localDate = Instant.ofEpochMilli(acquisitionDate)
+    val formattedAcquisitionDate: String
+        @Throws(InvalidAcquisitionDateException::class)
+        get() = acquisitionDate?.let {
+            try {
+                Instant.ofEpochMilli(it)
                     .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-            return localDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
-        } catch (Exception e) {
-            throw new InvalidAcquisitionDateException("Invalid acquisition date epoch time.");
-        }
+                    .toLocalDate()
+                    .format(DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+            } catch (e: Exception) {
+                throw InvalidAcquisitionDateException("Invalid acquisition date epoch time.")
+            }
+        } ?: ""
+
+    /**
+     * Creates and returns a String representation of the Vehicle.
+     *
+     * @return A String representation of the Vehicle, including its type, ID, model, manufacturer,
+     * price, rental status, and acquisition date.
+     */
+    override fun toString(): String {
+        val dateStr = acquisitionDate?.let { Date(it).toString() } ?: "Unknown"
+        return """Vehicle: $vehicleType
+            
+        ID: $vehicleId
+        Model: $vehicleModel
+        Manufacturer: $vehicleManufacturer
+        Price: $vehiclePrice $priceUnit
+        Currently being rented: $rentalStatus
+        Acquired: $dateStr"""
     }
 
     /**
-     * Creates and returns a String representation of the Vehicle
+     * Retrieves Vehicle data and puts it into the provided [MutableMap].
+     * Each key-value pair in the map represents an attribute of the vehicle.
      *
-     * @return A String representation of the Vehicle
-     *
-     * @author Dylan Browne
+     * @param map The [MutableMap] to be filled with data from the Vehicle. The keys are expected to be instances of [Key].
      */
-    public String toString() {
-        String dateStr = "Unknown";
-        if (acquisitionDate != null) {
-            dateStr = new Date(acquisitionDate).toString();
-        }
-
-        return  "Vehicle: " +  vehicleType +
-                "\nID: " + vehicleId +
-                "\nModel: " + vehicleModel +
-                "\nManufacturer: " + vehicleManufacturer +
-                "\nPrice: " + vehiclePrice + " " + priceUnit +
-                "\nCurrently being rented: " + rental +
-                "\nAcquired: " + dateStr;
-    }
-
-    /**
-     * Retrieves Vehicle data for a given Dealership.
-     * <p>
-     * This method fills a Map where each key-value pairs
-     * represents the vehicle's attributes.
-     *
-     * @param map The Map to be filled with data from the Vehicle
-     */
-    public void getDataMap(Map<Key, Object> map) {
-        Key.VEHICLE_ID.putValid(map, vehicleId);
-        Key.VEHICLE_MANUFACTURER.putValid(map, vehicleManufacturer);
-        Key.VEHICLE_MODEL.putValid(map, vehicleModel);
-        Key.VEHICLE_PRICE.putValid(map, vehiclePrice);
-        Key.VEHICLE_PRICE_UNIT.putValid(map, priceUnit);
-        Key.VEHICLE_ACQUISITION_DATE.putValid(map, acquisitionDate);
-        Key.VEHICLE_TYPE.putValid(map, vehicleType);
-        Key.VEHICLE_RENTAL_STATUS.putValid(map, rental);
+    fun getDataMap(map: MutableMap<Key?, Any?>?) {
+        map?.put(Key.VEHICLE_ID, vehicleId)
+        map?.put(Key.VEHICLE_MANUFACTURER, vehicleManufacturer)
+        map?.put(Key.VEHICLE_MODEL, vehicleModel)
+        map?.put(Key.VEHICLE_PRICE, vehiclePrice)
+        map?.put(Key.VEHICLE_PRICE_UNIT, priceUnit)
+        map?.put(Key.VEHICLE_ACQUISITION_DATE, acquisitionDate)
+        map?.put(Key.VEHICLE_TYPE, vehicleType)
+        map?.put(Key.VEHICLE_RENTAL_STATUS, rentalStatus)
     }
 }

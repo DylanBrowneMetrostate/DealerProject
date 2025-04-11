@@ -72,7 +72,8 @@ public class Dealership {
      */
     public Vehicle getVehicleFromSalesInventory(String vehicleID) throws VehicleNotFoundException {
         for (Vehicle vehicle : salesInventory) {
-            if (vehicle.getVehicleId()!= null && vehicle.getVehicleId().equals(vehicleID)) {
+            vehicle.getVehicleId();
+            if (vehicle.getVehicleId().equals(vehicleID)) {
                 return vehicle;
             }
         }
@@ -88,7 +89,8 @@ public class Dealership {
      */
     public Vehicle getVehicleFromRentalInventory(String vehicleID) throws VehicleNotFoundException {
         for (Vehicle vehicle : rentalInventory) {
-            if (vehicle.getVehicleId()!= null && vehicle.getVehicleId().equals(vehicleID)) {
+            vehicle.getVehicleId();
+            if (vehicle.getVehicleId().equals(vehicleID)) {
                 return vehicle;
             }
         }
