@@ -23,7 +23,7 @@ public class Dealership {
     private String name;
     private final ArrayList<Vehicle> salesInventory;
     private final ArrayList<Vehicle> rentalInventory;
-    private static final VehicleFactory vehicleFactory = VehicleCreator.getInstance(); // Singleton
+    private static final VehicleFactory vehicleFactory = VehicleCreator.Companion.getInstance(); // Singleton
     private boolean receivingVehicle;
     private boolean rentingVehicles;
 

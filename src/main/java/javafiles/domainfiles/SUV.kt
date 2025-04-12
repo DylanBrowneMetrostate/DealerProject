@@ -1,23 +1,17 @@
-package javafiles.domainfiles;
+package javafiles.domainfiles
 
 /**
- /**
- * SUV is a child class of Vehicle. Its constructor is called by {@link VehicleCreator#createVehicle(String, String, String, Long)}.
+ * / **
+ * SUV is a child class of [Vehicle]. Its constructor is called by [VehicleCreator.createVehicle].
  *
  * @author Christopher Engelhart
  */
-
-public class SUV extends Vehicle
-{
-    /**
-     * Constructs a new SUV object.
-     * Invokes the superclass constructor with "SUV" as the vehicle type,
-     * and sets the vehicle ID using {@link Vehicle#setVehicleId(String)}.
-     *
-     * @param vehicleID The vehicle ID of the Pickup to be created.
-     */
-    public SUV(String vehicleID, String model, Long price) {
-        super("SUV", vehicleID, model, price);
-    }
-
-}
+class SUV
+/**
+ * Constructs a new [SUV] object.
+ * Invokes the superclass constructor with "SUV" as the vehicle type,
+ * and sets the vehicle ID.
+ *
+ * @param vehicleID The vehicle ID of the Pickup to be created.
+ */
+    (vehicleID: String, model: String, price: Long) : Vehicle("SUV", vehicleID, model, price)

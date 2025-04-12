@@ -1,21 +1,21 @@
-package javafiles.domainfiles;
+package javafiles.domainfiles
 
-import javafiles.Key;
-import javafiles.customexceptions.InvalidPriceException;
-import javafiles.customexceptions.InvalidVehicleTypeException;
-import javafiles.customexceptions.MissingCriticalInfoException;
-
-import java.util.Map;
+import javafiles.Key
+import javafiles.customexceptions.InvalidPriceException
+import javafiles.customexceptions.InvalidVehicleTypeException
+import javafiles.customexceptions.MissingCriticalInfoException
 
 /**
- * Defines the contract for a factory that creates {@link Vehicle} objects.
+ * Defines the contract for a factory that creates [Vehicle] objects.
  * Implementations of this interface are responsible for instantiating specific
  * types of vehicles based on a provided type string.
  */
 interface VehicleFactory {
-    void fillVehicle(Vehicle v, String make, Long date, String priceUnit, Boolean rentalStatus);
-    Vehicle createVehicle(String type, String id, String model, Long price)
-            throws InvalidVehicleTypeException, InvalidPriceException, MissingCriticalInfoException;
-    Vehicle createVehicle(Map<Key, Object> map) throws InvalidVehicleTypeException,
-            InvalidPriceException, MissingCriticalInfoException;
+    fun fillVehicle(v: Vehicle?, make: String?, date: Long?, priceUnit: String?, rentalStatus: Boolean?)
+
+    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
+    fun createVehicle(type: String?, id: String?, model: String?, price: Long?): Vehicle?
+
+    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
+    fun createVehicle(map: Map<Key?, Any?>?): Vehicle?
 }

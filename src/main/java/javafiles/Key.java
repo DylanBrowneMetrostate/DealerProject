@@ -54,6 +54,7 @@ public enum Key {
         Object object = map.get(this);
         if (type.isInstance(object) && type.equals(CLASS)) {
             try {
+                System.out.println(object.toString());
                 return type.cast(object);
             } catch (ClassCastException e) {
                 // Should be caught with if statement, but left as is just in case.
