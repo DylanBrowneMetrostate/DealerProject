@@ -1,35 +1,33 @@
-package javafiles.domainfiles;
+package javafiles.domainfiles
 
-import javafiles.customexceptions.SportsCarRentalNotAllowedException;
+import javafiles.customexceptions.SportsCarRentalNotAllowedException
 
 /**
- * The {@code SportsCarRentalStrategy} class implements the {@link RentalStrategy} interface
+ * The `SportsCarRentalStrategy` class implements the [RentalStrategy] interface
  * and defines the rental behavior for sports cars. Sports cars are not allowed to be rented,
  * therefore, any attempt to enable or disable rental for a sports car will result in a
- * {@link SportsCarRentalNotAllowedException} being thrown.
+ * [SportsCarRentalNotAllowedException] being thrown.
  */
-public class SportsCarRentalStrategy implements RentalStrategy {
-
+class SportsCarRentalStrategy : RentalStrategy {
     /**
      * Attempts to enable the rental status of a sports car, which is not allowed.
      *
-     * @param vehicle The {@link Vehicle} of type {@link SportsCar} to enable for rental.
+     * @param vehicle The [Vehicle] of type [SportsCar] to enable for rental.
      * @throws SportsCarRentalNotAllowedException Always thrown, to indicate that sports cars cannot be rented.
      */
-    @Override
-    public void enableRental(Vehicle vehicle) throws SportsCarRentalNotAllowedException {
-        throw new SportsCarRentalNotAllowedException("Sports cars cannot be rented.");
+    @Throws(SportsCarRentalNotAllowedException::class)
+    override fun enableRental(vehicle: Vehicle?) {
+        throw SportsCarRentalNotAllowedException("Sports cars cannot be rented.")
     }
 
     /**
      * Attempts to disable the rental status of a sports car, which is not allowed.
      *
-     * @param vehicle The {@link Vehicle} of type {@link SportsCar} to disable the rental.
+     * @param vehicle The [Vehicle] of type [SportsCar] to disable the rental.
      * @throws SportsCarRentalNotAllowedException Always thrown, to indicate that sports cars cannot be rented.
      */
-    @Override
-    public void disableRental(Vehicle vehicle) throws SportsCarRentalNotAllowedException
-    {
-        throw  new SportsCarRentalNotAllowedException("Sports car rental features cannot be changed");
+    @Throws(SportsCarRentalNotAllowedException::class)
+    override fun disableRental(vehicle: Vehicle?) {
+        throw SportsCarRentalNotAllowedException("Sports car rental features cannot be changed")
     }
 }
