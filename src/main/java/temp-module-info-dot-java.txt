@@ -1,9 +1,0 @@
-module dealerproject {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires kotlin.stdlib;
-    requires java.base;
-
-    opens dealerproject to javafx.fxml;
-    exports dealerproject;
-}
