@@ -7,7 +7,7 @@ plugins {
 
 }
 
-group 'gui'
+//group 'org.example'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -24,7 +24,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 application {
-    mainModule = 'DealerProject'
+    mainModule = 'javafiles'
     mainClass = 'javafiles.gui.DealershipApp'
 }
 

@@ -3,7 +3,7 @@ package javafiles.gui;
 import javafiles.Key;
 import javafiles.customexceptions.ReadWriteException;
 import javafiles.dataaccessfiles.FileIOFactory;
-import javafiles.dataaccessfiles.FileIOReader;
+import javafiles.dataaccessfiles.fileioimplements.FileIOReader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
@@ -45,13 +45,13 @@ public class AddInventoryController {
      */
     @FXML
     private void handleLoadFromFile(ActionEvent event) throws IOException {
-        String path = FileIOFactory.selectFilePath('r');
+        String path = FileIOFactory.getInstance().selectFileReaderPath();
 
         if (path == null) {
             return;
         }
         try {
-            FileIOReader fileIOReader = FileIOFactory.buildNewFileIOReader(path);
+            FileIOReader fileIOReader = FileIOFactory.getInstance().buildNewFileIOReader(path);
             List<Map<Key, Object>> maps = fileIOReader.readInventory();
             List<Map<Key, Object>> badMaps = AppStateManager.dataToInventory(maps);
             GuiUtility.showMapTables(maps, badMaps);

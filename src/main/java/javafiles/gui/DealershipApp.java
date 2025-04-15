@@ -44,8 +44,6 @@ public class DealershipApp extends Application {
 
         AppStateManager.initializeCompany(company);
 
-        FileIOFactory.setupFileIOBuilders();
-
         SceneManager sceneManger = SceneManager.getInstance(primaryStage);
         sceneManger.switchScene(MAIN_SCREEN);
         primaryStage.show();
@@ -62,7 +60,6 @@ public class DealershipApp extends Application {
      * @param args Command-line arguments.
      */
     public static void main(String[] args) {
-        System.out.println("Hello World!");
         launch(args);
     }
 }

@@ -44,8 +44,6 @@ class DealershipAppTemp() : Application() {
 
         AppStateManager.initializeCompany(company)
 
-        FileIOFactory.setupFileIOBuilders()
-
         val sceneManger = SceneManager.getInstance(primaryStage)
         sceneManger.switchScene(FXMLPath.MAIN_SCREEN)
         primaryStage.show()
