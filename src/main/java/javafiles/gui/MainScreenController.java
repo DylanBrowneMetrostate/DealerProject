@@ -7,8 +7,7 @@ import javafx.scene.control.Button;
 
 import java.io.IOException;
 
-import static javafiles.gui.FXMLPath.INVENTORY_SCREEN;
-import static javafiles.gui.FXMLPath.PROFILE_MANAGEMENT;
+import static javafiles.gui.FXMLPath.*;
 
 /**
  * Controller for the main screen of the application.
@@ -25,6 +24,10 @@ public class MainScreenController {
     private Button manageCompanyInventoryButton;
     @FXML
     private Button ManageCompanyProfileButton;
+
+    @FXML
+    private  Button badInventoryManagementButton;
+
 
 
     @FXML
@@ -56,5 +59,11 @@ public class MainScreenController {
     private void handleManageCompanyProfile(ActionEvent event) throws IOException {
         SceneManager sceneManager = SceneManager.getInstance(null);
         sceneManager.switchScene( PROFILE_MANAGEMENT);
+    }
+
+    @FXML
+    private void handleManageBadInventory() throws IOException {
+        SceneManager sceneManager = SceneManager.getInstance(null);
+        sceneManager.switchScene(BAD_INVENTORY);
     }
 }

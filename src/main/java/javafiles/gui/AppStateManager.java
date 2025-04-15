@@ -279,12 +279,11 @@ public class AppStateManager {
      * the dealership's sales and rental inventories based on the updated rental status.
      * </p>
      * 
-     * mwethod calls {@link Company#updateVehicleRental(String, Vehicle)}
+     * mwethod calls {@link Dealership#updateVehicleRental(Vehicle)}
      *
     */
     public static void updateDealershipVehicleRentalState(String dealershipId, Vehicle vehicleToUpdate) throws
              RentalException
-
     {
         Dealership dealer = company.findDealership(dealershipId);
         dealer.updateVehicleRental(vehicleToUpdate);
@@ -310,7 +309,7 @@ public class AppStateManager {
 
     /**
      * Gets the complete inventory of a given dealership.
-     * Method calls {@link Company#getDealershipCompleteInventory(String)}.
+     * Method calls {@link Dealership#getTotalInventory()}.
      *
      * @param dealershipId dealership ID of target dealership
      * @return ArrayList<Vehicle> represent a complete collection of target dealership's sales and rental inventory
@@ -323,7 +322,7 @@ public class AppStateManager {
 
     /**
      * Removes target {@link Vehicle} from a {@link Dealership} inventory.
-     * Method calls {@link Company#removeVehicleFromDealership(String, Vehicle)} 
+     * Method calls {@link Dealership#removeVehicleFromInventory(Vehicle)}
      *
      * @param dealershipId target dealership to remove vehicle from
      * @param targetVehicle vehicle to be removed

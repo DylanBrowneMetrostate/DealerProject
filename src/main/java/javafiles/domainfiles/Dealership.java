@@ -23,7 +23,7 @@ public class Dealership {
     private String name;
     private final ArrayList<Vehicle> salesInventory;
     private final ArrayList<Vehicle> rentalInventory;
-    private static final VehicleFactory vehicleFactory = VehicleCreator.getInstance(); // Singleton
+    private static final VehicleFactory vehicleFactory = VehicleCreator.Companion.getInstance(); // Singleton
     private boolean receivingVehicle;
     private boolean rentingVehicles;
 
@@ -72,7 +72,8 @@ public class Dealership {
      */
     public Vehicle getVehicleFromSalesInventory(String vehicleID) throws VehicleNotFoundException {
         for (Vehicle vehicle : salesInventory) {
-            if (vehicle.getVehicleId()!= null && vehicle.getVehicleId().equals(vehicleID)) {
+            vehicle.getVehicleId();
+            if (vehicle.getVehicleId().equals(vehicleID)) {
                 return vehicle;
             }
         }
@@ -88,7 +89,8 @@ public class Dealership {
      */
     public Vehicle getVehicleFromRentalInventory(String vehicleID) throws VehicleNotFoundException {
         for (Vehicle vehicle : rentalInventory) {
-            if (vehicle.getVehicleId()!= null && vehicle.getVehicleId().equals(vehicleID)) {
+            vehicle.getVehicleId();
+            if (vehicle.getVehicleId().equals(vehicleID)) {
                 return vehicle;
             }
         }
