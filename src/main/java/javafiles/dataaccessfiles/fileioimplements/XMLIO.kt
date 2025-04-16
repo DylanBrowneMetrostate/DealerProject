@@ -53,7 +53,6 @@ internal class XMLIO
      * A write mode [XMLIO] object can be created, but trying to call writeInventory
      * will throw a [ReadWriteException].
      *
-     * @param path The full path of the file to be opened or created.
      * @throws ReadWriteException Thrown if the mode is an invalid char
      */
     @Throws(ReadWriteException::class) constructor(override val file: File) : FileIOReader {
@@ -88,7 +87,7 @@ internal class XMLIO
         for (key in keys) {
             if (key.xmlName.equals(tagName, ignoreCase = true)) {
                 // If there is an issue with the val, the first value is saved and the rest discarded.
-                val nodeValCast = if (key.key.className.contains(Long::class.java.name, ignoreCase = true)) {
+                val nodeValCast = if (key.key.className == java.lang.Long::class.java.name) {
                     try {
                         nodeValue.toLong()
                     } catch (e: NumberFormatException) {

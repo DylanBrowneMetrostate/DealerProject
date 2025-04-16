@@ -1,0 +1,16 @@
+<Dealer id="d_id">
+    <Name>name</Name>
+    <Vehicle type="pickup" id="v_id0">
+        <Price>17000</Price>
+        <Model>model</Model>
+    </Vehicle>
+    <Vehicle type="sports car" id="v_id1">
+        <Price unit="pounds">17000</Price>
+        <Make>make</Make>
+        <Model>model</Model>
+    </Vehicle>
+    <Vehicle type="suv" id="v_id2">
+        <Price unit="dollars">16500</Price>
+        <Model>model</Model>
+    </Vehicle>
+</Dealer>

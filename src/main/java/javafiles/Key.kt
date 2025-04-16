@@ -7,22 +7,23 @@ enum class Key (// Getters and Setters:
     private val clazz: Class<*>, // ^would love to make it a generic instead, but can't seem to do that with enum
     val needed: Boolean
 ) {
+    // java.lang is needed for Long and Boolean or primitive would be used.
     DEALERSHIP_ID("dealership_id", String::class.java, true),
     DEALERSHIP_NAME("dealership_name", String::class.java, false),
-    DEALERSHIP_RECEIVING_STATUS("dealership_receiving_status", Boolean::class.java, false),
-    DEALERSHIP_RENTING_STATUS("dealership_rental_status", Boolean::class.java, false),
+    DEALERSHIP_RECEIVING_STATUS("dealership_receiving_status", java.lang.Boolean::class.java, false),
+    DEALERSHIP_RENTING_STATUS("dealership_rental_status", java.lang.Boolean::class.java, false),
 
     VEHICLE_TYPE("vehicle_type", String::class.java, true),
     VEHICLE_MANUFACTURER("vehicle_manufacturer", String::class.java, false),
     VEHICLE_MODEL("vehicle_model", String::class.java, true),
 
     VEHICLE_ID("vehicle_id", String::class.java, true),
-    VEHICLE_RENTAL_STATUS("vehicle_rental_status", Boolean::class.java, false),
+    VEHICLE_RENTAL_STATUS("vehicle_rental_status", java.lang.Boolean::class.java, false),
 
-    VEHICLE_PRICE("price", Long::class.java, true),
+    VEHICLE_PRICE("price", java.lang.Long::class.java, true),
     VEHICLE_PRICE_UNIT("price_unit", String::class.java, false),
 
-    VEHICLE_ACQUISITION_DATE("acquisition_date", Long::class.java, false),
+    VEHICLE_ACQUISITION_DATE("acquisition_date", java.lang.Long::class.java, false),
 
     REASON_FOR_ERROR("error_reason", ReadWriteException::class.java, false);
 
@@ -43,7 +44,6 @@ enum class Key (// Getters and Setters:
         val obj = map[this]
         if (type.isInstance(obj) && type == clazz) {
             try {
-                println(obj.toString())
                 return type.cast(obj)
             } catch (e: ClassCastException) {
                 // Should be caught with if statement, but left as is just in case.

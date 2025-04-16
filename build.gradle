@@ -37,6 +37,14 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+
+}
 
 dependencies {
     implementation("com.googlecode.json-simple:json-simple:1.1.1") {

@@ -8,14 +8,7 @@ import java.io.File
 internal class XMLIOBuilder(override val extensions: Array<String>) : FileIOReaderBuilder {
     @Throws(ReadWriteException::class)
     override fun createFileIOReader(path: String): FileIO {
-        if (path.endsWith("pom.xml")) {
-            throw ReadWriteException(
-                """
-                    Can't read or write to Maven's pom.xml file.
-                    If this is not Maven's pom.xml file, rename it and try again.
-                    """.trimIndent()
-            )
-        }
+        // pom.xml is no longer disallowed
         return XMLIO(File(path))
     }
 }
