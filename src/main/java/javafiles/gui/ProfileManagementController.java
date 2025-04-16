@@ -100,7 +100,7 @@ public class ProfileManagementController {
             result.ifPresent(newName -> {
                 // Update the name in the selected row
                 selectedDealershipRow.setName(newName);
-                AppStateManager.getCompany().findDealership(selectedDealershipRow.getId()).setName(newName);
+                AppStateManager.getCompany().findDealership(selectedDealershipRow.getId()).setDealerName(newName);
 
                 // Refresh the table to reflect the change
                 dealershipTable.refresh();

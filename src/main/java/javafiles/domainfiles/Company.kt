@@ -81,7 +81,7 @@ class Company {
         InvalidPriceException::class,
         MissingCriticalInfoException::class
     )
-    fun manualVehicleAdd(map: Map<Key?, Any?>, dealer: Dealership) {
+    fun manualVehicleAdd(map: Map<Key, Any>, dealer: Dealership) {
         val id: String = map[Key.VEHICLE_ID] as? String ?: throw MissingCriticalInfoException("Vehicle ID is missing.")
         val make: String? = map[Key.VEHICLE_MANUFACTURER] as? String
         val model: String = map[Key.VEHICLE_MODEL] as? String ?: throw MissingCriticalInfoException("Vehicle model is missing.")
@@ -106,17 +106,16 @@ class Company {
      * @return weather the Vehicle is in the company.
      */
     private fun isVehicleInInventoryById(id: String?): Boolean {
-        return listDealerships.any { it.isVehicleInInventoryById(id) }
+        return listDealerships.any { it.isVehicleInInventoryById(id ?: "") }
     }
 
     /**
-     * Takes a List of Map<Key></Key>, Object>s representing a List of [Vehicle] information
+     * Takes a List of Map<Key, Object>s representing a List of [Vehicle] information
      * and writes the data in each map to the corresponding [Dealership].
      *
      * @param data The List of Maps containing Vehicle information to be added to inventory.
      */
     fun dataToInventory(data: List<MutableMap<Key, Any>>?): List<Map<Key, Any>> {
-
         val badInventoryMaps = mutableListOf<Map<Key, Any>>()
         val newlyCreatedDealerships = mutableMapOf<Dealership, Map<Key, Any>>()
 
@@ -125,7 +124,6 @@ class Company {
         }
 
         for (map in data) {
-
             if (map.containsKey(Key.REASON_FOR_ERROR)) {
                 badInventoryMaps.add(map)
                 continue
@@ -172,36 +170,20 @@ class Company {
         return badInventoryMaps
     }
 
+    /**
+     * Retrieves [Vehicle] data for all Dealerships within the Company.
+     *
+     * @return A [List] of [Map]s representing all vehicles in the Company.
+     */
     val dataMap: List<Map<Key, Any>>
-        /**
-         * Retrieves [Vehicle] data for all Dealerships within the Company.
-         *
-         *
-         * This method gathers Vehicle information from all Dealerships associated with the
-         * Company and compiles it into a single list of Maps. Each Map in the List
-         * represents a Vehicle and contains its attributes.
-         *
-         * @return A [List] of [Map] Objects. Each [Map] represents a Vehicle
-         * and contains its attributes (dealership ID, vehicle type, manufacturer, model,
-         * vehicle ID, price, and acquisition date) as key-value pairs. Returns all vehicles from each
-         * Dealership in the Company. Returns an empty list if the Company has no Dealerships
-         * or if none of the Dealerships have any Vehicles.
-         */
         get() = listDealerships.flatMap { it.dataMap }
 
+    /**
+     * Generates a formatted [String] of Dealership IDs.
+     *
+     * @return A tab-separated string of dealership IDs.
+     */
     val dealershipIdList: String
-        /**
-         * Generates a formatted [List] of Dealership IDs.
-         *
-         *
-         * This method retrieves all Dealerships associated with the Company and
-         * creates a String containing their IDs, separated by tabs. The IDs are arranged
-         * with a maximum of 6 IDs per line. If the Company has no Dealerships,
-         * the method returns a message indicating this.
-         *
-         * @return A string containing the formatted list of dealership IDs, or the
-         * message "No valid Dealerships." if the company has no dealerships.
-         */
         get() {
             if (listDealerships.isEmpty()) {
                 return "No valid Dealerships."
@@ -211,28 +193,24 @@ class Company {
                 .joinToString(separator = "\n")
         }
 
+    /**
+     * Returns a list of all Dealership IDs.
+     *
+     * @return An [ArrayList] of all dealership ID strings.
+     */
     val allDealershipIds: ArrayList<String>
-        /**
-         * Returns a [ArrayList] of Strings representing all Dealership IDs in the company.
-         *
-         * @return A [ArrayList] of Strings containing all Dealership IDs.
-         */
         get() = listDealerships.map { it.dealerId }.toCollection(ArrayList())
 
-
-
+    /**
+     * Returns a list of maps containing dealership info.
+     *
+     * @return A [List] of dealership info maps.
+     */
     val dealershipInfoList: List<Map<String, Any>>
-        /**
-         * Returns a [List] of Maps containing data about all Dealerships in the Company.
-         *
-         * @return the [List] of Maps containing Dealership info.
-         */
         get() {
-            val dealershipInfoList: MutableList<Map<String, Any>> =
-                ArrayList()
+            val dealershipInfoList: MutableList<Map<String, Any>> = ArrayList()
             for (dealership in listDealerships) {
-                val dealershipInfo: MutableMap<String, Any> =
-                    HashMap()
+                val dealershipInfo: MutableMap<String, Any> = HashMap()
                 dealershipInfo["id"] = dealership.dealerId
                 dealershipInfo["name"] = dealership.dealerName
                 dealershipInfo["receivingEnabled"] = dealership.statusAcquiringVehicle
@@ -243,32 +221,28 @@ class Company {
         }
 
     /**
-     * Updates the Dealership receiving status for Vehicles and prints the appropriate
-     * message for that update based on what the userInput read from the user.
+     * Updates the Dealership receiving status for Vehicles.
      *
-     * @param dealerIndex The index of the Dealership to be updated in listDealerships.
-     * @param userInput The input provided by the user that is being processed.
-     * @return Whether the input is invalid, true if it is invalid, false otherwise.
+     * @param dealerIndex index of dealership in list
+     * @param userInput string command ("enable"/"disable")
+     * @return true if invalid input, false otherwise
      */
     fun changeReceivingStatus(dealerIndex: Int, userInput: String): Boolean {
         val dealer = listDealerships[dealerIndex]
         if (userInput.equals("enable", ignoreCase = true)) {
-            // Check if the dealership's vehicle receiving status is already enabled
             if (dealer.statusAcquiringVehicle) {
-                println("Dealership " + dealer.dealerId + " is already set to receive vehicles.")
+                println("Dealership ${dealer.dealerId} is already set to receive vehicles.")
             } else {
-                // Enable vehicle receiving for the dealership
-                dealer.setReceivingVehicle(true)
-                println("Vehicle receiving status for dealership " + dealer.dealerId + " has been enabled.")
+                dealer.statusAcquiringVehicle = true
+                println("Vehicle receiving status for dealership ${dealer.dealerId} has been enabled.")
             }
             return false
         } else if (userInput.equals("disable", ignoreCase = true)) {
-            // Disable the vehicle receiving status
             if (!dealer.statusAcquiringVehicle) {
-                println("Dealership " + dealer.dealerId + " is already set to not receive vehicles.")
+                println("Dealership ${dealer.dealerId} is already set to not receive vehicles.")
             } else {
                 dealer.setReceivingVehicle(false)
-                println("Vehicle receiving status for dealership " + dealer.dealerId + " has been disabled.")
+                println("Vehicle receiving status for dealership ${dealer.dealerId} has been disabled.")
             }
             return false
         }
