@@ -30,28 +30,6 @@ internal class JSONIOReadTest {
         }
     }
 
-    // Expected: Creation of JSONIO does not throw an exception.
-    @Test
-    fun fileDNEWrite() {
-        try {
-            JSONIOTestHelper.getJSONIOWrite("DNE_W", "DNE", false)
-        } catch (e: ReadWriteException) {
-            Assertions.fail<Any>(e.message)
-        }
-    }
-
-    // Expected: Creation of JSONIO throws an exception.
-    @Test
-    fun fileDNEBadChar() {
-        try {
-            val jsonIO = FileIOFactoryTest.getFileIOForTest("DNE_X", "DNE", ".json", 'x', true) as JSONIORead
-            Assertions.fail<Any>(jsonIO.toString())
-        } catch (e: ReadWriteException) {
-            val cause = BadCharException("Bad character.")
-            FileIOFactoryTest.assertSameCauseType(ReadWriteException(cause), e)
-        }
-    }
-
     /**
      * Creates the [JSONIORead] object from the partialPath provided. Then reads the
      * inventory and returns the results. If the number of [Map]s read is not
@@ -136,7 +114,15 @@ internal class JSONIOReadTest {
         }
     }
 
-
+    @Test
+    fun readFromFolder() {
+        try {
+            JSONIOTestHelper.getJSONIORead("not_a_file", "read", true)
+            Assertions.fail("Expected to not create JSONIORead file, but did.")
+        } catch (e: ReadWriteException) {
+            Assertions.assertNull(e.cause)
+        }
+    }
 
     /* TODO: Move to a Java to Kotlin Issue test file.
 

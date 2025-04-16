@@ -73,6 +73,16 @@ class JSONIOWriteTest {
         FileIOFactoryTest.testMaps(targetLst, maps)
     }
 
+    // Expected: Creation of JSONIO does not throw an exception.
+    @Test
+    fun fileDNEWrite() {
+        try {
+            JSONIOTestHelper.getJSONIOWrite("DNE_W", "DNE", false)
+        } catch (e: ReadWriteException) {
+            Assertions.fail<Any>(e.message)
+        }
+    }
+
     /**
      * Tests that the [Map]s calculated from readMaps are written to the file correctly.
      * It tests this by writing it to the file and then comparing the [List]<[Map]>s
@@ -102,6 +112,16 @@ class JSONIOWriteTest {
     @Test
     fun writeInventoryMultipleMaps() {
         writeInventoryGood("multi_map", arrayOf(MapKey.PARTIAL_MAP, MapKey.FULL_MAP, MapKey.EXTRA_MAP))
+    }
+
+    @Test
+    fun writeToFolder() {
+        try {
+            JSONIOTestHelper.getJSONIOWrite("not_a_file", "write", true)
+            Assertions.fail("Expected to not create JSONIOWrite file, but did.")
+        } catch (e: ReadWriteException) {
+            Assertions.assertNull(e.cause)
+        }
     }
 
     companion object {

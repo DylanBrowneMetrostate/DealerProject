@@ -118,7 +118,7 @@ public class FileIOFactoryTest {
             FileIO fileIO = switch (mode) {
                 case 'R', 'r' -> FileIOFactory.getInstance().buildNewFileIOReader(path);
                 case 'W', 'w' -> FileIOFactory.getInstance().buildNewFileIOWriter(path);
-                default -> throw new ReadWriteException(new BadCharException(mode + " is a bad char."));
+                default -> fail("Not a valid char.");
             };
             assertFalse(failExpected);
             return fileIO;

@@ -61,7 +61,7 @@ internal class JSONIOWrite
             jFile.writeJSONString(fileWriter)
             fileWriter.close()
         } catch (e: IOException) {
-            println(e.message)
+            throw(ReadWriteException(e))
         }
     }
 }

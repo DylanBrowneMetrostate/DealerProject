@@ -57,18 +57,6 @@ internal class XMLIOTest {
         }
     }
 
-    // Expected: Creation of XMLIO throws an exception.
-    @Test
-    fun fileDNEBadChar() {
-        try {
-            val xmlIO = getXMLIO("DNE_X", 'x', true)
-            Assertions.fail<Any>(xmlIO.toString())
-        } catch (e: ReadWriteException) {
-            val cause = BadCharException("Bad character.")
-            FileIOFactoryTest.assertSameCauseType(ReadWriteException(cause), e)
-        }
-    }
-
     private val minMap: MutableMap<Key, Any>
         /**
          * Creates and returns a new [Map] of an example Vehicle with the minimum possible

@@ -12,21 +12,33 @@ import java.io.File
 import java.util.*
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.collections.ArrayList
 
 object FileIOFactory {
     @JvmStatic
     val instance: FileIOFactory = FileIOFactory
 
+    private val BUILDERS: Map<BuilderTag, List<FileIOBuilder>>
+
+    /*
     private val READER_BUILDERS: MutableList<FileIOReaderBuilder> = ArrayList()
     private val WRITER_BUILDERS: MutableList<FileIOWriterBuilder> = ArrayList()
+     */
 
     init {
         val jsonIOBuilder: FileIOReaderBuilder = JSONIOBuilder(arrayOf("json"))
         val xmlIOBuilder: FileIOReaderBuilder = XMLIOBuilder(arrayOf("xml"))
 
+        BUILDERS = EnumMap(BuilderTag::class.java)
+
+        BUILDERS[BuilderTag.READER] = listOf<FileIOReaderBuilder>(jsonIOBuilder, xmlIOBuilder)
+        BUILDERS[BuilderTag.WRITER] = listOf<FileIOWriterBuilder>(jsonIOBuilder as FileIOWriterBuilder)
+
+        /*
         WRITER_BUILDERS.add(jsonIOBuilder as FileIOWriterBuilder)
         READER_BUILDERS.add(jsonIOBuilder)
         READER_BUILDERS.add(xmlIOBuilder)
+         */
     }
 
     /**
@@ -39,15 +51,13 @@ object FileIOFactory {
      */
     private fun buildable(path: String, extensions: Array<String>): Boolean {
         for (extension in extensions) {
-            if (path.endsWith(extension)) {
-                return true
-            }
+            if (path.endsWith(extension)) {return true}
         }
         return false
     }
 
     @Throws(ReadWriteException::class)
-    internal fun build(builder: FileIOBuilder, path: String, mode: BuilderTag): FileIO? {
+    private fun build(builder: FileIOBuilder, path: String, mode: BuilderTag): FileIO? {
         if (buildable(path, builder.extensions)) {
             if (mode == BuilderTag.READER && builder is FileIOReaderBuilder) {
                 return builder.createFileIOReader(path)
@@ -151,17 +161,16 @@ object FileIOFactory {
     }
 
     private fun getBuilderList(mode: BuilderTag): List<FileIOBuilder> {
-        return ArrayList(if (mode == BuilderTag.WRITER) WRITER_BUILDERS else READER_BUILDERS)
+        return BUILDERS[mode] ?: throw NullPointerException()
     }
 
     /**
      * Creates and returns the appropriate type of [FileIO] from the given path
      * and mode. If the creation of the [FileIO] is invalid, throws a new
-     * [ReadWriteException] (such as through invalid path, mode, or overriding
-     * Maven files).
+     * [ReadWriteException] (such as through invalid path).
      *
      * @param path The path of the file to be opened or created.
-     * @param mode A char representation of the type of file that is created (read 'r' or write 'w').
+     * @param mode A representation of the type of file that is created (read or write).
      * @return The new instance of the [FileIO] created.
      * @throws ReadWriteException When the creation of the [FileIO] is invalid.
      */
@@ -180,27 +189,31 @@ object FileIOFactory {
     }
 
     @Throws(ReadWriteException::class)
-    fun buildNewFileIOReader(path: String): FileIOReader {
+    private fun validateFile(path:String, mode: BuilderTag){
         val file = File(path)
         if (!file.exists()) {
-            val reason = "Path: \"$path\" does not exist, so it can't be read."
-            val cause = PathNotFoundException(reason)
-            throw ReadWriteException(cause)
-        }
-        try {
-            return buildNewFileIO(path, BuilderTag.READER) as FileIOReader
-        } catch (e: ClassCastException) {
-            throw ReadWriteException(e)
+            if (mode == BuilderTag.READER) {
+                val reason = "Path: \"$path\" does not exist, so it can't be read."
+                throw ReadWriteException(PathNotFoundException(reason))
+            }
+        } else if (!file.isFile) {
+            val reason = "Path: \"$path\" is a directory, so it can't be read."
+            throw ReadWriteException(reason)
         }
     }
 
     @Throws(ReadWriteException::class)
+    fun buildNewFileIOReader(path: String): FileIOReader {
+        val tag = BuilderTag.READER;
+        validateFile(path, tag)
+        return buildNewFileIO(path, tag) as FileIOReader
+    }
+
+    @Throws(ReadWriteException::class)
     fun buildNewFileIOWriter(path: String): FileIOWriter {
-        try {
-            return buildNewFileIO(path, BuilderTag.WRITER) as FileIOWriter
-        } catch (e: ClassCastException) {
-            throw ReadWriteException(e)
-        }
+        val tag = BuilderTag.WRITER;
+        validateFile(path, tag)
+        return buildNewFileIO(path, tag) as FileIOWriter
     }
 
     internal enum class BuilderTag {
