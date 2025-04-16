@@ -6,6 +6,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
@@ -39,6 +41,12 @@ public class ProfileManagementController {
     @FXML
     private TableColumn<DealershipRow, Boolean> rentingColumn;
 
+    @FXML
+    private ComboBox<String> dealerComboBox;
+
+    @FXML
+    private Label dealerNameLabel;
+
     /**
      * Initializes the profile management controller.
      * Sets up the table columns, fetches dealership data from AppStateManager,
@@ -55,14 +63,50 @@ public class ProfileManagementController {
         // Fetch the dealership rows from AppStateManager
         ObservableList<DealershipRow> tableData = FXCollections.observableArrayList(AppStateManager.getDealershipRows());
 
-        // Set the table data
-        dealershipTable.setItems(tableData);
+        // Populate the ComboBox with dealership IDs and add an "All Dealerships" option
+        ObservableList<String> dealershipIds = FXCollections.observableArrayList("All Dealerships");
+        for (DealershipRow row : tableData) {
+            dealershipIds.add(row.getId());
+        }
+        dealerComboBox.setItems(dealershipIds);
 
-        // Add a listener to the selected item in the table
-        dealershipTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        // Clear the table and set the ComboBox to no selection by default
+        dealershipTable.setItems(FXCollections.observableArrayList()); // Clear the table
+        dealerComboBox.getSelectionModel().clearSelection(); // No default selection
+        dealerNameLabel.setText(""); // Clear the label by default
+
+        // Add a listener to update the table and label when a ComboBox selection is made
+        dealerComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                selectedDealershipRow = newValue;
+                if (newValue.equals("All Dealerships")) {
+                    // Show all dealerships if "All Dealerships" is selected
+                    dealershipTable.setItems(tableData);
+                    dealerNameLabel.setText(""); // Clear the label
+                } else {
+                    // Filter the table data to show only the selected dealership
+                    ObservableList<DealershipRow> filteredData = FXCollections.observableArrayList(
+                        tableData.stream()
+                                 .filter(row -> row.getId().equals(newValue))
+                                 .toList()
+                    );
+                    dealershipTable.setItems(filteredData);
+
+                    // Update the label to show the name of the selected dealership
+                    if (!filteredData.isEmpty()) {
+                        dealerNameLabel.setText(filteredData.get(0).getName());
+                    } else {
+                        dealerNameLabel.setText(""); // Clear the label if no matching dealership is found
+                    }
+                }
+            } else {
+                // Clear the table and label if no selection is made
+                dealershipTable.setItems(FXCollections.observableArrayList());
+                dealerNameLabel.setText("");
             }
+        });
+
+        dealershipTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            selectedDealershipRow = newValue; // Update the selected row
         });
     }
 
@@ -88,7 +132,6 @@ public class ProfileManagementController {
     @FXML
     private void handleEditDealershipName(ActionEvent event) {
         if (selectedDealershipRow != null) {
-
             // Create a TextInputDialog to get the new name from the user
             TextInputDialog dialog = new TextInputDialog(selectedDealershipRow.getName());
             dialog.setTitle("Edit Dealership Name");
@@ -106,8 +149,7 @@ public class ProfileManagementController {
                 dealershipTable.refresh();
             });
         } else {
-            showErrorAlert("No Dealership Selected", "Please select a dealership,");
-
+            showErrorAlert("No Dealership Selected", "Please select a dealership.");
         }
     }
 
