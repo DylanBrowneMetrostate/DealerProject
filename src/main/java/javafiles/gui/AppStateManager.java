@@ -23,6 +23,7 @@ public class AppStateManager {
 
     private static String masterInventoryList = "masterInventoryList.json";
     private static Company company;
+    private static ArrayList<Map<Key,Object>>  badInventoryList = new ArrayList<>();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -77,6 +78,18 @@ public class AppStateManager {
     {
         return company.getListDealerships();
     }
+
+    /**
+     * Retrieves a list of maps containing failed inventory load vehicles.
+     * The maps contain key-value pairs where each key represents vehicle data.
+     *
+     * @return badInventoryList
+     */
+    public static List<Map<Key, Object>> getBadDataInventory()
+    {
+      return badInventoryList;
+    }
+
 
 
     /**
@@ -144,6 +157,11 @@ public class AppStateManager {
      */
     public static List<Map<Key, Object>> dataToInventory(List<Map<Key, Object>> maps) {
         List<Map<Key, Object>> badMaps = company.dataToInventory(maps);
+        if(badMaps != null)
+        {
+            badInventoryList.addAll(badMaps);
+        }
+
         writeToInventory();
         return badMaps;
     }

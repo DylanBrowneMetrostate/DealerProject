@@ -39,7 +39,7 @@
     <center>
         <TableView fx:id="badInventoryTableView" editable="true" BorderPane.alignment="CENTER">
             <columns>
-                <TableColumn maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Select" />
+                <TableColumn fx:id="selectColumn" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Select" />
                 <TableColumn fx:id="dealershipIdColumn" text="Dealership ID" />
                 <TableColumn fx:id="dealershipNameColum" text ="Dealership Name" />
                 <TableColumn fx:id="vehicleIdColumn" text="Vehicle ID" />
