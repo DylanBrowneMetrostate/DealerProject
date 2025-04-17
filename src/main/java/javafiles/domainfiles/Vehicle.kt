@@ -150,13 +150,13 @@ abstract class Vehicle(
      *
      * @param map The [MutableMap] to be filled with data from the Vehicle. The keys are expected to be instances of [Key].
      */
-    fun getDataMap(map: MutableMap<Key?, Any?>?) {
+    fun getDataMap(map: MutableMap<Key, Any>) {
         map?.put(Key.VEHICLE_ID, vehicleId)
         map?.put(Key.VEHICLE_MANUFACTURER, vehicleManufacturer)
         map?.put(Key.VEHICLE_MODEL, vehicleModel)
         map?.put(Key.VEHICLE_PRICE, vehiclePrice)
         map?.put(Key.VEHICLE_PRICE_UNIT, priceUnit)
-        map?.put(Key.VEHICLE_ACQUISITION_DATE, acquisitionDate)
+        map?.put(Key.VEHICLE_ACQUISITION_DATE, acquisitionDate ?: 0L)
         map?.put(Key.VEHICLE_TYPE, vehicleType)
         map?.put(Key.VEHICLE_RENTAL_STATUS, rentalStatus)
     }

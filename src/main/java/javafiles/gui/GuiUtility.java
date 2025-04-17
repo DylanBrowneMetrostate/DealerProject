@@ -19,7 +19,7 @@ public class GuiUtility {
     /**
      * An enum for linking Key.REASON_FOR_ERROR value with a message for the gui.
      */
-    private enum CauseEnum {
+    enum CauseEnum {
         NUM_FORM(NumberFormatException.class, "Num Form", "Could not convert String to Long."),
         DUP(DuplicateKeyException.class, "Dup Key", "Conflicting keys in file."),
         VEHICLE_EXISTS(VehicleAlreadyExistsException.class, "Dup ID", "Vehicle already exists."),
