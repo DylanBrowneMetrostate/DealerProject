@@ -58,14 +58,16 @@ public class ViewInventoryController {
      */
     @FXML
     public void initialize() {
+        List<Map<Key, Object>> dataMaps = AppStateManager.getCompanyData();
+
         // Initialize the table columns with PropertyValueFactory
         dealershipIdColumn.setCellValueFactory(cellData -> {
-            String dealershipId = getDealershipIdFromMap(cellData.getValue());
+            String dealershipId = getDealershipIdFromMap(cellData.getValue(), dataMaps);
             return new SimpleStringProperty(dealershipId);
         });
         dealershipNameColum.setCellValueFactory(cellData -> {
             try {
-                String dealershipName = getDealershipNameFromMap(cellData.getValue());
+                String dealershipName = getDealershipNameFromMap(cellData.getValue(), dataMaps);
                 return new SimpleStringProperty(dealershipName);
             } catch (DealershipNotFoundException e) {
                 showAlert(e.getMessage());
@@ -102,10 +104,9 @@ public class ViewInventoryController {
      * @param vehicle The Vehicle object.
      * @return The dealership ID or "" if dealership ID is not found for a vehicle.
      */
-    private String getDealershipIdFromMap(Vehicle vehicle) {
-        List<Map<Key, Object>> dataMaps = AppStateManager.getCompanyData();
+    private String getDealershipIdFromMap(Vehicle vehicle, List<Map<Key, Object>> dataMaps) {
         for (Map<Key, Object> dataMap : dataMaps) {
-            if (dataMap.get(Key.VEHICLE_ID).equals(vehicle.getVehicleId())) {
+            if (vehicle.getVehicleId().equals(dataMap.get(Key.VEHICLE_ID))) {
                 return (String) dataMap.get(Key.DEALERSHIP_ID);
             }
         }
@@ -124,10 +125,8 @@ public class ViewInventoryController {
      * @throws DealershipNotFoundException if Dealership is not found in the company
      * @throws VehicleNotFoundException if vehicle does not exist in the company
      */
-    private String getDealershipNameFromMap(Vehicle vehicle) throws  DealershipNotFoundException, VehicleNotFoundException {
-        List<Map<Key, Object>> dataMaps = AppStateManager.getCompanyData();
+    private String getDealershipNameFromMap(Vehicle vehicle, List<Map<Key, Object>> dataMaps) throws  DealershipNotFoundException, VehicleNotFoundException {
         Dealership dealership;
-
         for (Map<Key, Object> dataMap : dataMaps) {
             // Ensure the vehicle ID is not null before comparison
             if (dataMap.get(Key.VEHICLE_ID) != null && dataMap.get(Key.VEHICLE_ID).equals(vehicle.getVehicleId())) {
@@ -143,7 +142,7 @@ public class ViewInventoryController {
                 }
             }
         }
-       throw new VehicleNotFoundException("Vehicle " + vehicle.getVehicleId() + " not found for " + vehicle.getVehicleId() + ".");
+        throw new VehicleNotFoundException("Vehicle " + vehicle.getVehicleId() + " not found for " + vehicle.getVehicleId() + ".");
     }
 
 

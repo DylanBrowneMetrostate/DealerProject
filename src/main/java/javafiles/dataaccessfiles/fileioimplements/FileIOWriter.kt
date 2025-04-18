@@ -5,6 +5,5 @@ import javafiles.customexceptions.ReadWriteException
 import javafiles.dataaccessfiles.FileIO
 
 interface FileIOWriter : FileIO {
-    @Throws(ReadWriteException::class)
-    fun writeInventory(maps: List<Map<Key, Any>>)
+    fun writeInventory(maps: Map<Map<Key, Any>, List<Map<Key, Any>>>)
 }

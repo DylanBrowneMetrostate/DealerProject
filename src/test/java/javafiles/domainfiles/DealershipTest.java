@@ -33,7 +33,7 @@ class DealershipTest {
 
     @Test
     public void testConstructor() {
-        assertEquals("D001", dealership.dealerId);
+        assertEquals("D001", dealership.getDealerId());
         assertEquals("Test Dealership", dealership.getDealerName());
         assertTrue(dealership.getStatusAcquiringVehicle());
         assertFalse(dealership.getRentingVehicles());
@@ -43,7 +43,7 @@ class DealershipTest {
 
     @Test
     public void testSetName() {
-        dealership.setName("New Name");
+        dealership.setDealerName("New Name");
         assertEquals("New Name", dealership.getDealerName());
     }
 
@@ -262,7 +262,7 @@ class DealershipTest {
         dealership.getRentalVehicles().add(vehicle3);
         dealership.getRentalVehicles().add(vehicle4);
 
-        List<Map<Key, Object>> dataMapList = dealership.getDataMap();
+        List<Map<Key, Object>> dataMapList = dealership.calcDataMap();
 
         assertNotNull(dataMapList);
         assertEquals(4, dataMapList.size());

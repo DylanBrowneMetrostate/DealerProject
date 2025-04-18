@@ -103,7 +103,7 @@ public class CompanyTest {
 
     @Test
     public void testGetDealershipIdList() {
-        String list = company.getDealershipIdList();
+        String list = company.calcDealershipIdList();
         assertTrue(list.contains("D001"));
         assertTrue(list.contains("D002"));
     }

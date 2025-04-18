@@ -1,9 +1,7 @@
 package javafiles.dataaccessfiles.builderimplements
 
-import javafiles.customexceptions.ReadWriteException
-import javafiles.dataaccessfiles.FileIO
+import javafiles.dataaccessfiles.fileioimplements.FileIOWriter
 
 interface FileIOWriterBuilder : FileIOBuilder {
-    @Throws(ReadWriteException::class)
-    fun createFileIOWriter(path: String): FileIO
+    override fun createFileIO(path: String): FileIOWriter
 }

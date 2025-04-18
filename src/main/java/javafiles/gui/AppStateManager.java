@@ -58,13 +58,22 @@ public class AppStateManager {
      * Retrieves a List of Maps representing all vehicle data within the Company instance.
      * </p>
      * Each Map contains key-value pairs representing vehicle attributes.
-     * Method calls {@link Company#getDataMap()}.
+     * Method calls {@link Company#calcDataMap()}.
      *
      * @return A List of Maps containing vehicle data.
      */
-    public static List<Map<Key, Object>> getCompanyData()
-    {
-        return company.getDataMap();
+    public static List<Map<Key, Object>> getCompanyData() {
+        Map<Map<Key, Object>, List<Map<Key, Object>>> data = company.calcDataMap();
+        List<Map<Key, Object>> dataList = new ArrayList<>();
+
+        for(Map<Key, Object> dealerMap: data.keySet()) {
+            for (Map<Key, Object> vehicleMap: data.get(dealerMap)) {
+                Map<Key, Object> map = new EnumMap<>(vehicleMap);
+                map.putAll(dealerMap);
+                dataList.add(map);
+            }
+        }
+        return dataList;
     }
 
     /**
@@ -144,7 +153,7 @@ public class AppStateManager {
         Dealership receiver = company.findDealership(receiverId);
         sender.dealershipVehicleTransfer(receiver, transferVehicle);
 
-        writeToInventory();
+        writeToInventoryFile();
     }
 
 
@@ -157,12 +166,9 @@ public class AppStateManager {
      */
     public static List<Map<Key, Object>> dataToInventory(List<Map<Key, Object>> maps) {
         List<Map<Key, Object>> badMaps = company.dataToInventory(maps);
-        if(badMaps != null)
-        {
-            badInventoryList.addAll(badMaps);
-        }
+        badInventoryList.addAll(badMaps);
 
-        writeToInventory();
+        writeToInventoryFile();
         return badMaps;
     }
 
@@ -189,11 +195,11 @@ public class AppStateManager {
      * Writes the Company's inventory data to a file.
      * </p>
      * This method retrieves the inventory data from the Company by calling
-     * {@link Company#getDataMap()} and attempts to write it to the specified
+     * {@link Company#calcDataMap()} and attempts to write it to the specified
      * file using FileIO. If a ReadWriteException occurs, it prints an error message.
      */
-    protected static void writeToInventory() {
-        List<Map<Key, Object>> data = company.getDataMap();
+    protected static void writeToInventoryFile() {
+        Map<Map<Key, Object>, List<Map<Key, Object>>> data = company.calcDataMap();
         try {
             FileIOWriter fileIO = FileIOFactory.getInstance().buildNewFileIOWriter(masterInventoryList);
             fileIO.writeInventory(data);
@@ -232,22 +238,29 @@ public class AppStateManager {
      * Retrieves a List of DealershipRow objects representing dealership data.
      * </p>
      * This method fetches dealership information from the Company instance using
-     * {@link Company#getDealershipInfoList()} and converts it into a List of
+     * {@link Company#calcDealershipInfoList()} and converts it into a List of
      * {@link ProfileManagementController.DealershipRow} objects.
      *
      * @return A List of {@link ProfileManagementController.DealershipRow} objects containing
      *         dealership data such as ID, name, receiving status, and renting status.
      */
     public static List<ProfileManagementController.DealershipRow> getDealershipRows() {
-        List<Map<String, Object>> dealershipInfoList = company.getDealershipInfoList();
+        List<Map<Key, Object>> dealershipInfoList = company.calcDealershipInfoList();
         List<ProfileManagementController.DealershipRow> dealershipRows = new ArrayList<>();
         Set<String> existingIds = new HashSet<>();
 
-        for (Map<String, Object> info : dealershipInfoList) {
-            String id = (String) info.get("id");
-            String name = (String) info.get("name");
-            Boolean receivingEnabled = (Boolean) info.get("receivingEnabled");
-            Boolean rentingEnabled = (Boolean) info.get("rentingEnabled");
+        for (Map<Key, Object> info : dealershipInfoList) {
+            /*
+            String id = (String) info.get(Key.DEALERSHIP_ID);
+            String name = (String) info.get(Key.DEALERSHIP_NAME);
+            Boolean receivingEnabled = (Boolean) info.get(Key.DEALERSHIP_RECEIVING_STATUS);
+            Boolean rentingEnabled = (Boolean) info.get(Key.DEALERSHIP_RENTING_STATUS);
+            */
+
+            String id = Key.DEALERSHIP_ID.getVal(info, String.class);
+            String name = Key.DEALERSHIP_NAME.getVal(info, String.class);
+            Boolean receivingEnabled = Key.DEALERSHIP_RECEIVING_STATUS.getVal(info, Boolean.class);
+            Boolean rentingEnabled = Key.DEALERSHIP_RENTING_STATUS.getVal(info, Boolean.class);
 
             // Check if the ID already exists
             if (!existingIds.contains(id)) {
@@ -269,27 +282,27 @@ public class AppStateManager {
 
         company.manualVehicleAdd(map, dealership);
 
-        writeToInventory();
+        writeToInventoryFile();
     }
 
     /**
         Sets receiving status for a {@link Dealership} in the company.
-        Method calls {@link Dealership#setReceivingVehicle(Boolean)}
+        Method calls {@link Dealership#setReceivingVehicle(boolean)}
      */
-    public static void setDealershipReceivingStatus(Dealership dealership,boolean status)
+    public static void setDealershipReceivingStatus(Dealership dealership, boolean status)
     {
         dealership.setReceivingVehicle(status);
-        writeToInventory();
+        writeToInventoryFile();
     }
 
     /**
      Sets rental status for a {@link Dealership} in the company.
-     Method calls {@link Dealership#setRentingVehicles(Boolean)}
+     Method calls {@link Dealership#setRentingVehicles(boolean)}
      */
     public static void setDealershipRentalStatus(Dealership dealership,boolean status)
     {
         dealership.setRentingVehicles(status);
-        writeToInventory();
+        writeToInventoryFile();
     }
 
     /**
@@ -305,7 +318,7 @@ public class AppStateManager {
     {
         Dealership dealer = company.findDealership(dealershipId);
         dealer.updateVehicleRental(vehicleToUpdate);
-        writeToInventory();
+        writeToInventoryFile();
     }
 
 
@@ -351,7 +364,7 @@ public class AppStateManager {
     {
         Dealership dealer = company.findDealership(dealershipId);
         dealer.removeVehicleFromInventory(targetVehicle);
-        writeToInventory();
+        writeToInventoryFile();
     }
 
 }

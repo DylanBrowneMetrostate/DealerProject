@@ -7,6 +7,7 @@ import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 
 import java.io.*
+import java.util.EnumMap
 
 /**
  * A class that reads and writes to JSON files
@@ -21,7 +22,7 @@ internal class JSONIOWrite
  *
  * @throws ReadWriteException Thrown if the mode is an invalid char.
  */
-    @Throws(ReadWriteException::class) constructor(override val file: File) : FileIOWriter {
+    constructor(override val file: File) : FileIOWriter {
     /**
      * Takes a Map<Key></Key>, Object> of data with the same keys as keys
      * and converts it to a JSONObject and returns it.
@@ -46,12 +47,31 @@ internal class JSONIOWrite
      * @throws ReadWriteException Thrown if not in write ('w') mode.
      */
     @Throws(ReadWriteException::class)
-    override fun writeInventory(maps: List<Map<Key, Any>>) {
+    override fun writeInventory(maps: Map<Map<Key, Any>, List<Map<Key, Any>>>) {
         val jArray = JSONArray()
-        for (carData in maps) {
+
+        maps.forEach { dealerCarPair->
+            if (dealerCarPair.value.isEmpty()) {
+                val dummyCar = EnumMap(dealerCarPair.key)
+                Key.DUMMY_VEHICLE.putValid(dummyCar, true)
+
+                jArray.add(makeJSONObject(dummyCar))
+            } else {
+                dealerCarPair.value.forEach { carMap ->
+                    val fullCarMap = EnumMap(carMap)
+                    fullCarMap.putAll(dealerCarPair.key)
+
+                    jArray.add(makeJSONObject(fullCarMap))
+                }
+            }
+        }
+
+        /*
+        for (dealer in maps.keys) {
             val jObj = makeJSONObject(carData)
             jArray.add(jObj)
         }
+         */
 
         val fileWriter: Writer
         val jFile = JSONObject()

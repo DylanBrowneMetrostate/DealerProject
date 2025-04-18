@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach
 
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class JSONIOWriteTest {
     @AfterEach
@@ -48,7 +49,9 @@ class JSONIOWriteTest {
         }
 
         try {
-            jsonIO!!.writeInventory(targetLst)
+            // TODO: Fix this scuffed solution
+            val asMap: Map<Map<Key, Any>, List<Map<Key, Any>>> = hashMapOf(Pair(EnumMap(Key::class.java), targetLst))
+            jsonIO!!.writeInventory(asMap)
         } catch (e: ReadWriteException) {
             Assertions.fail<Any>(e.toString())
         }

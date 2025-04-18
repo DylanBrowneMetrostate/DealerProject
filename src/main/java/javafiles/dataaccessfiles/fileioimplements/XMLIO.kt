@@ -55,7 +55,7 @@ internal class XMLIO
      *
      * @throws ReadWriteException Thrown if the mode is an invalid char
      */
-    @Throws(ReadWriteException::class) constructor(override val file: File) : FileIOReader {
+    constructor(override val file: File) : FileIOReader {
     /**
      * Takes information about a node or attribute and appends it to the given [Map] if
      * the tag name or attribute name is a valid name for the given [XMLKey]s.

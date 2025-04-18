@@ -41,10 +41,9 @@ public class AddInventoryController {
      * Handles the "Load From File" button action.
      *
      * @param event The ActionEvent triggered by the "Load From File" button.
-     * @throws IOException If an I/O error occurs during scene switching.
      */
     @FXML
-    private void handleLoadFromFile(ActionEvent event) throws IOException {
+    private void handleLoadFromFile(ActionEvent event) {
         String path = FileIOFactory.getInstance().selectFileReaderPath();
 
         if (path == null) {

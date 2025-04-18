@@ -6,8 +6,7 @@ import javafiles.customexceptions.ReadWriteException;
 import kotlin.enums.EnumEntries;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,56 +34,63 @@ class KeyTest {
         }
     }
 
+    private Key[] calcNotAddedKeys(Key[] addedKeysArray) {
+        List<Key> addedKeys = new ArrayList<>();
+        Collections.addAll(addedKeys, addedKeysArray);
+
+        Key[] notAddedKeys = new Key[getEntries().size() - addedKeys.size()];
+
+        int i = 0;
+        for (Key key: getEntries()) {
+            if (!addedKeys.contains(key)) {
+                notAddedKeys[i] = key;
+                i++;
+            }
+        }
+
+        assertEquals(notAddedKeys.length, i);
+
+        return notAddedKeys;
+    }
+
     @Test
     public void putValidStringTest() {
-        Key[] notAddedKeys = {
-                DEALERSHIP_RECEIVING_STATUS,
-                DEALERSHIP_RENTING_STATUS,
-                VEHICLE_RENTAL_STATUS,
-                VEHICLE_PRICE,
-                VEHICLE_ACQUISITION_DATE,
-                REASON_FOR_ERROR
+        Key[] addedKeys = {
+                DEALERSHIP_ID, DEALERSHIP_NAME,
+                VEHICLE_TYPE, VEHICLE_MANUFACTURER,
+                VEHICLE_MODEL, VEHICLE_ID,
+                VEHICLE_PRICE_UNIT
         };
+
+        Key[] notAddedKeys = calcNotAddedKeys(addedKeys);
 
         putValidObjectTest("String", notAddedKeys);
     }
 
     @Test
     public void putValidLongTest() {
-        Key[] notAddedKeys = new Key[getEntries().size() - 2];
+        Key[] addedKeys = {VEHICLE_ACQUISITION_DATE, VEHICLE_PRICE};
 
-        int i = 0;
-        for (Key key: getEntries()) {
-            if (!key.equals(VEHICLE_ACQUISITION_DATE) && !key.equals(VEHICLE_PRICE)) {
-                notAddedKeys[i] = key;
-                i++;
-            }
-        }
-        assertEquals(notAddedKeys.length, i);
+        Key[] notAddedKeys = calcNotAddedKeys(addedKeys);
 
         putValidObjectTest(1046L, notAddedKeys);
     }
 
     @Test
     public void putValidBooleanTest() {
-        Key[] notAddedKeys = new Key[getEntries().size() - 3];
+        Key[] addedKeys = {
+                DEALERSHIP_RECEIVING_STATUS, DEALERSHIP_RENTING_STATUS,
+                VEHICLE_RENTAL_STATUS, DUMMY_VEHICLE
+        };
 
-        int i = 0;
-        for (Key key: getEntries()) {
-            if (!key.equals(DEALERSHIP_RECEIVING_STATUS) && !key.equals(DEALERSHIP_RENTING_STATUS)
-                    && !key.equals(VEHICLE_RENTAL_STATUS)) {
-                notAddedKeys[i] = key;
-                i++;
-            }
-        }
-        assertEquals(notAddedKeys.length, i);
+        Key[] notAddedKeys = calcNotAddedKeys(addedKeys);
 
         putValidObjectTest(true, notAddedKeys);
     }
 
     private Key[] getEntriesAsArray() {
-        Key[] keys = new Key[getEntries().size()];
         EnumEntries<Key> entries = getEntries();
+        Key[] keys = new Key[entries.size()];
         for (int i = 0; i < keys.length; i++) {
             keys[i] = entries.get(i);
         }
@@ -128,98 +134,110 @@ class KeyTest {
         map.put(Key.VEHICLE_RENTAL_STATUS, true);
         map.put(Key.VEHICLE_ACQUISITION_DATE, 123L);
 
+        map.put(DUMMY_VEHICLE, false);
         map.put(REASON_FOR_ERROR, new ReadWriteException("No error, just need all keys."));
 
+        assertEquals(map.size(), Key.getEntries().size(), "Missing keys in Good map, add them.");
         return map;
     }
 
     @Test
     public void getValGoodMapGoodValStr() {
         Map<Key, Object> map = getGoodMap();
-        String str = DEALERSHIP_NAME.getVal(map, String.class);
-        assertNotNull(str);
+        DEALERSHIP_NAME.getVal(map, String.class);
     }
 
     @Test
     public void getValGoodMapGoodValLong() {
         Map<Key, Object> map = getGoodMap();
-        Long num = VEHICLE_ACQUISITION_DATE.getVal(map, Long.class);
-        assertNotNull(num);
+        VEHICLE_ACQUISITION_DATE.getVal(map, Long.class);
     }
 
     @Test
     public void getValGoodMapGoodValBool() {
         Map<Key, Object> map = getGoodMap();
-        Boolean bool = VEHICLE_RENTAL_STATUS.getVal(map, Boolean.class);
-        assertNotNull(bool);
+        VEHICLE_RENTAL_STATUS.getVal(map, Boolean.class);
     }
 
     @Test
     public void getValGoodMapAllGoodVal() {
         Map<Key, Object> map = getGoodMap();
         for (Key key: getEntries()) {
-            Object obj = null;
             String className = key.getClassName();
 
-            if (className.equals(String.class.getName())) {
-                obj = key.getVal(map, String.class);
-            } else if (className.equals(Long.class.getName())) {
-                obj = key.getVal(map, Long.class);
-            } else if (className.equals(Boolean.class.getName())) {
-                obj = key.getVal(map, Boolean.class);
-            } else if (className.equals(ReadWriteException.class.getName())) {
-                obj = key.getVal(map, ReadWriteException.class);
+            try {
+                if (className.equals(String.class.getName())) {
+                    key.getVal(map, String.class);
+                } else if (className.equals(Long.class.getName())) {
+                    key.getVal(map, Long.class);
+                } else if (className.equals(Boolean.class.getName())) {
+                    key.getVal(map, Boolean.class);
+                } else if (className.equals(ReadWriteException.class.getName())) {
+                    key.getVal(map, ReadWriteException.class);
+                }
+            } catch (ClassCastException e) {
+                fail(e.getMessage() + '\n' + key.getKey() + " not found in map with: " + className);
             }
-
-            assertNotNull(obj);
         }
     }
 
     @Test
     public void getValGoodMapBadValStr() {
         Map<Key, Object> map = getGoodMap();
-        Long str = DEALERSHIP_NAME.getVal(map, Long.class);
-        assertNull(str);
+        try {
+            DEALERSHIP_NAME.getVal(map, Long.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValGoodMapBadValLong() {
         Map<Key, Object> map = getGoodMap();
-        Boolean num = VEHICLE_ACQUISITION_DATE.getVal(map, Boolean.class);
-        assertNull(num);
+        try {
+            VEHICLE_ACQUISITION_DATE.getVal(map, Boolean.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValGoodMapBadValBool() {
         Map<Key, Object> map = getGoodMap();
-        String bool = VEHICLE_RENTAL_STATUS.getVal(map, String.class);
-        assertNull(bool);
+        try {
+            VEHICLE_RENTAL_STATUS.getVal(map, String.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValGoodMapAllBadVal() {
         Map<Key, Object> map = getGoodMap();
         for (Key key: getEntries()) {
-            boolean calledFunction = false;
-            Object obj = null;
             String className = key.getClassName();
 
-            if (className.equals(String.class.getName())) {
-                obj = key.getVal(map, Boolean.class);
-                calledFunction = true;
-            } else if (className.equals(Long.class.getName())) {
-                obj = key.getVal(map, String.class);
-                calledFunction = true;
-            } else if (className.equals(Boolean.class.getName())) {
-                obj = key.getVal(map, Long.class);
-                calledFunction = true;
-            } else if (className.equals(ReadWriteException.class.getName())) {
-                obj = key.getVal(map, Integer.class);
-                calledFunction = true;
+            try {
+                if (className.equals(String.class.getName())) {
+                    key.getVal(map, Boolean.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Long.class.getName())) {
+                    key.getVal(map, String.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Boolean.class.getName())) {
+                    key.getVal(map, Long.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(ReadWriteException.class.getName())) {
+                    key.getVal(map, Integer.class);
+                    fail("No exception thrown.");
+                }
+            } catch (ClassCastException e) {
+                continue;
             }
-
-            assertTrue(calledFunction);
-            assertNull(obj);
+            fail("Did not call key.getVal().");
         }
     }
 
@@ -245,96 +263,122 @@ class KeyTest {
     @Test
     public void getValBadMapGoodValStr() {
         Map<Key, Object> map = getBadMap();
-        String str = DEALERSHIP_NAME.getVal(map, String.class);
-        assertNull(str);
+        try {
+            DEALERSHIP_NAME.getVal(map, String.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValBadMapGoodValLong() {
         Map<Key, Object> map = getBadMap();
-        Long num = VEHICLE_ACQUISITION_DATE.getVal(map, Long.class);
-        assertNull(num);
+        try {
+            VEHICLE_ACQUISITION_DATE.getVal(map, Long.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValBadMapGoodValBool() {
         Map<Key, Object> map = getBadMap();
-        Boolean bool = VEHICLE_RENTAL_STATUS.getVal(map, Boolean.class);
-        assertNull(bool);
+        try {
+            VEHICLE_RENTAL_STATUS.getVal(map, Boolean.class);
+            fail("Did not throw ClassCastException.");
+        } catch (ClassCastException _) {
+            
+        }
     }
 
     @Test
     public void getValBadMapAllGoodVal() {
         Map<Key, Object> map = getBadMap();
         for (Key key: getEntries()) {
-            boolean calledFunction = false;
-            Object obj = null;
             String className = key.getClassName();
 
-            if (className.equals(String.class.getName())) {
-                obj = key.getVal(map, String.class);
-                calledFunction = true;
-            } else if (className.equals(Long.class.getName())) {
-                obj = key.getVal(map, Long.class);
-                calledFunction = true;
-            } else if (className.equals(Boolean.class.getName())) {
-                obj = key.getVal(map, Boolean.class);
-                calledFunction = true;
-            } else if (className.equals(ReadWriteException.class.getName())) {
-                obj = key.getVal(map, ReadWriteException.class);
-                calledFunction = true;
+            try {
+                if (className.equals(String.class.getName())) {
+                    key.getVal(map, String.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Long.class.getName())) {
+                    key.getVal(map, Long.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Boolean.class.getName())) {
+                    key.getVal(map, Boolean.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(ReadWriteException.class.getName())) {
+                    key.getVal(map, ReadWriteException.class);
+                    fail("No exception thrown.");
+                }
+            } catch (ClassCastException e) {
+                continue;
             }
 
-            assertTrue(calledFunction);
-            assertNull(obj);
+            fail("Did not call key.getVal().");
         }
     }
 
     @Test
     public void getValBadMapBadValStr() {
         Map<Key, Object> map = getBadMap();
-        Long str = DEALERSHIP_NAME.getVal(map, Long.class);
-        assertNull(str);
+        try {
+            DEALERSHIP_NAME.getVal(map, Long.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValBadMapBadValLong() {
         Map<Key, Object> map = getBadMap();
-        Boolean num = VEHICLE_ACQUISITION_DATE.getVal(map, Boolean.class);
-        assertNull(num);
+        try {
+            VEHICLE_ACQUISITION_DATE.getVal(map, Boolean.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValBadMapBadValBool() {
         Map<Key, Object> map = getBadMap();
-        String bool = VEHICLE_RENTAL_STATUS.getVal(map, String.class);
-        assertNull(bool);
+        try {
+            VEHICLE_RENTAL_STATUS.getVal(map, String.class);
+            fail("No ClassCastException Thrown.");
+        } catch (ClassCastException _) {
+
+        }
     }
 
     @Test
     public void getValBadMapAllBadVal() {
         Map<Key, Object> map = getBadMap();
         for (Key key: getEntries()) {
-            boolean calledFunction = false;
-            Object obj = null;
             String className = key.getClassName();
 
-            if (className.equals(String.class.getName())) {
-                obj = key.getVal(map, Boolean.class);
-                calledFunction = true;
-            } else if (className.equals(Long.class.getName())) {
-                obj = key.getVal(map, String.class);
-                calledFunction = true;
-            } else if (className.equals(Boolean.class.getName())) {
-                obj = key.getVal(map, Long.class);
-                calledFunction = true;
-            } else if (className.equals(ReadWriteException.class.getName())) {
-                obj = key.getVal(map, Integer.class);
-                calledFunction = true;
+            try {
+                if (className.equals(String.class.getName())) {
+                    key.getVal(map, Boolean.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Long.class.getName())) {
+                    key.getVal(map, String.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(Boolean.class.getName())) {
+                    key.getVal(map, Long.class);
+                    fail("No exception thrown.");
+                } else if (className.equals(ReadWriteException.class.getName())) {
+                    key.getVal(map, Integer.class);
+                    fail("No exception thrown.");
+                }
+            } catch (ClassCastException _) {
+                continue;
             }
 
-            assertTrue(calledFunction);
-            assertNull(obj);
+            fail("Did not call key.getVal().");
         }
     }
 }

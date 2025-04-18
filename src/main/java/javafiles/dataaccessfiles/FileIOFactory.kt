@@ -4,7 +4,6 @@ import javafiles.customexceptions.BadExtensionException
 import javafiles.customexceptions.PathNotFoundException
 import javafiles.customexceptions.ReadWriteException
 import javafiles.dataaccessfiles.builderimplements.*
-import javafiles.dataaccessfiles.builderimplements.JSONIOBuilder
 import javafiles.dataaccessfiles.builderimplements.XMLIOBuilder
 import javafiles.dataaccessfiles.fileioimplements.FileIOReader
 import javafiles.dataaccessfiles.fileioimplements.FileIOWriter
@@ -12,7 +11,6 @@ import java.io.File
 import java.util.*
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.collections.ArrayList
 
 object FileIOFactory {
     @JvmStatic
@@ -20,25 +18,15 @@ object FileIOFactory {
 
     private val BUILDERS: Map<BuilderTag, List<FileIOBuilder>>
 
-    /*
-    private val READER_BUILDERS: MutableList<FileIOReaderBuilder> = ArrayList()
-    private val WRITER_BUILDERS: MutableList<FileIOWriterBuilder> = ArrayList()
-     */
-
     init {
-        val jsonIOBuilder: FileIOReaderBuilder = JSONIOBuilder(arrayOf("json"))
+        val jsonIOReadBuilder: FileIOReaderBuilder = JSONIOReadBuilder(arrayOf("json"))
+        val jsonIOWriteBuilder: FileIOWriterBuilder = JSONIOWriteBuilder(arrayOf("json"))
         val xmlIOBuilder: FileIOReaderBuilder = XMLIOBuilder(arrayOf("xml"))
 
         BUILDERS = EnumMap(BuilderTag::class.java)
 
-        BUILDERS[BuilderTag.READER] = listOf<FileIOReaderBuilder>(jsonIOBuilder, xmlIOBuilder)
-        BUILDERS[BuilderTag.WRITER] = listOf<FileIOWriterBuilder>(jsonIOBuilder as FileIOWriterBuilder)
-
-        /*
-        WRITER_BUILDERS.add(jsonIOBuilder as FileIOWriterBuilder)
-        READER_BUILDERS.add(jsonIOBuilder)
-        READER_BUILDERS.add(xmlIOBuilder)
-         */
+        BUILDERS[BuilderTag.READER] = listOf<FileIOReaderBuilder>(jsonIOReadBuilder, xmlIOBuilder)
+        BUILDERS[BuilderTag.WRITER] = listOf<FileIOWriterBuilder>(jsonIOWriteBuilder)
     }
 
     /**
@@ -56,15 +44,9 @@ object FileIOFactory {
         return false
     }
 
-    @Throws(ReadWriteException::class)
-    private fun build(builder: FileIOBuilder, path: String, mode: BuilderTag): FileIO? {
+    private fun build(builder: FileIOBuilder, path: String): FileIO? {
         if (buildable(path, builder.extensions)) {
-            if (mode == BuilderTag.READER && builder is FileIOReaderBuilder) {
-                return builder.createFileIOReader(path)
-            }
-            if (mode == BuilderTag.WRITER && builder is FileIOWriterBuilder) {
-                return builder.createFileIOWriter(path)
-            }
+            return builder.createFileIO(path)
         }
         return null
     }
@@ -81,7 +63,7 @@ object FileIOFactory {
      *
      * @author Christopher Engelhart
      */
-    private fun selectFile(extensions: Array<String?>): File? {
+    private fun selectFile(extensions: Array<String>): File? {
         val fileChooser = JFileChooser()
         fileChooser.currentDirectory = File(System.getProperty("user.dir"))
         fileChooser.fileFilter = FileNameExtensionFilter("Choose File", *extensions)
@@ -99,7 +81,7 @@ object FileIOFactory {
      * the dialog, or null if the user cancels or closes the dialog without
      * selecting a file.
      */
-    private fun selectFilePath(extensions: Array<String?>): String? {
+    private fun selectFilePath(extensions: Array<String>): String? {
         val file = selectFile(extensions) ?: return null
         return file.toString()
     }
@@ -117,16 +99,10 @@ object FileIOFactory {
      */
     private fun selectFilePath(mode: BuilderTag): String? {
         val builders = getBuilderList(mode)
+        val extensions: Array<String> = builders.flatMap {
+            it.extensions.toList()
+        }.toTypedArray()
 
-        val buildersExtensions: MutableList<String> = ArrayList()
-        for (builder in builders) {
-            val extensions = builder.extensions
-            buildersExtensions.addAll(listOf(*extensions))
-        }
-        val extensions = arrayOfNulls<String>(buildersExtensions.size)
-        for (i in extensions.indices) {
-            extensions[i] = buildersExtensions[i]
-        }
         return selectFilePath(extensions)
     }
 
@@ -179,7 +155,7 @@ object FileIOFactory {
         val builders = getBuilderList(mode)
 
         for (builder in builders) {
-            val fileIO = build(builder, path, mode)
+            val fileIO = build(builder, path)
             if (fileIO != null) {
                 return fileIO
             }

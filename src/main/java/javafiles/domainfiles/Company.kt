@@ -2,6 +2,9 @@ package javafiles.domainfiles
 
 import javafiles.Key
 import javafiles.customexceptions.*
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * Represents a central manager for all dealerships within a vehicle dealership system.
@@ -109,55 +112,55 @@ class Company {
         return listDealerships.any { it.isVehicleInInventoryById(id ?: "") }
     }
 
+    private fun mapToInventory(map: MutableMap<Key, Any>, newDealers: MutableMap<Dealership, Map<Key, Any>>): Map<Key, Any>? {
+        if (map.containsKey(Key.REASON_FOR_ERROR)) { return map }
+
+        val id = map[Key.DEALERSHIP_ID] as? String
+        val name = map[Key.DEALERSHIP_NAME] as? String
+
+        if (id == null) { return Key.addErrorReason(map, MissingCriticalInfoException("No dealerID.")) }
+        var dealership = findDealership(id)
+
+        if (map.containsKey(Key.DUMMY_VEHICLE) && Key.DUMMY_VEHICLE.getVal(map, Boolean::class)) {
+            if (dealership == null) {
+                dealership = Dealership(id, name ?: "")
+                addDealership(dealership)
+                newDealers[dealership] = map // Mark as newly created
+            }
+            return null
+        }
+
+        val vId = map[Key.VEHICLE_ID] as? String
+        if (vId != null && isVehicleInInventoryById(vId)) {
+            return Key.addErrorReason(map, VehicleAlreadyExistsException("Duplicate Vehicle ID in inventory"))
+        }
+
+        if (dealership == null) {
+            dealership = Dealership(id, name ?: "")
+            addDealership(dealership)
+            newDealers[dealership] = map // Mark as newly created
+        }
+
+        if (!dealership.dataToInventory(map)) {
+            return map
+        }
+        return null
+    }
+
     /**
      * Takes a List of Map<Key, Object>s representing a List of [Vehicle] information
      * and writes the data in each map to the corresponding [Dealership].
      *
      * @param data The List of Maps containing Vehicle information to be added to inventory.
      */
-    fun dataToInventory(data: List<MutableMap<Key, Any>>?): List<Map<Key, Any>> {
+    fun dataToInventory(data: List<MutableMap<Key, Any>>): List<Map<Key, Any>> {
         val badInventoryMaps = mutableListOf<Map<Key, Any>>()
         val newlyCreatedDealerships = mutableMapOf<Dealership, Map<Key, Any>>()
 
-        if (data == null) {
-            return badInventoryMaps
-        }
-
         for (map in data) {
-            if (map.containsKey(Key.REASON_FOR_ERROR)) {
-                badInventoryMaps.add(map)
-                continue
-            }
-
-            val id = map[Key.DEALERSHIP_ID] as? String
-            val name = map[Key.DEALERSHIP_NAME] as? String
-
-            if (id == null) {
-                val cause = MissingCriticalInfoException("No dealerID.")
-                val exception = ReadWriteException(cause)
-                map[Key.REASON_FOR_ERROR] = exception
-                badInventoryMaps.add(map)
-                continue
-            }
-
-            val v_id = map[Key.VEHICLE_ID] as? String
-            if (v_id != null && isVehicleInInventoryById(v_id)) {
-                val cause = VehicleAlreadyExistsException("Duplicate Vehicle ID in inventory")
-                val exception = ReadWriteException(cause)
-                map[Key.REASON_FOR_ERROR] = exception
-                badInventoryMaps.add(map)
-                continue
-            }
-
-            var dealership = findDealership(id)
-            if (dealership == null) {
-                dealership = Dealership(id, name ?: "")
-                addDealership(dealership)
-                newlyCreatedDealerships[dealership] = map // Mark as newly created
-            }
-
-            if (!dealership.dataToInventory(map)) {
-                badInventoryMaps.add(map)
+            val badMap = mapToInventory(map, newlyCreatedDealerships)
+            if (badMap != null) {
+                badInventoryMaps.add(badMap)
             }
         }
 
@@ -175,23 +178,28 @@ class Company {
      *
      * @return A [List] of [Map]s representing all vehicles in the Company.
      */
-    val dataMap: List<Map<Key, Any>>
-        get() = listDealerships.flatMap { it.dataMap }
+    fun calcDataMap(): Map<Map<Key, Any>, List<Map<Key, Any>>> {
+        val maps: MutableMap<Map<Key, Any>, List<Map<Key, Any>>> = HashMap()
+        listDealerships.forEach {
+            maps[it.calcDealerMapData()] = it.calcDataMap()
+        }
+        return maps
+    }
 
     /**
      * Generates a formatted [String] of Dealership IDs.
      *
      * @return A tab-separated string of dealership IDs.
      */
-    val dealershipIdList: String
-        get() {
-            if (listDealerships.isEmpty()) {
-                return "No valid Dealerships."
-            }
-            return listDealerships.joinToString(separator = "\t") { it.dealerId }
-                .chunked(6)
-                .joinToString(separator = "\n")
+    fun calcDealershipIdList(): String {
+        // TODO: Fix, this does not separate into 6 id's separated by tabs, but by 6 char's per line
+        if (listDealerships.isEmpty()) {
+            return "No valid Dealerships."
         }
+        return listDealerships.joinToString(separator = "\t") { it.dealerId }
+            .chunked(6)
+            .joinToString(separator = "\n")
+    }
 
     /**
      * Returns a list of all Dealership IDs.
@@ -206,19 +214,22 @@ class Company {
      *
      * @return A [List] of dealership info maps.
      */
-    val dealershipInfoList: List<Map<String, Any>>
-        get() {
-            val dealershipInfoList: MutableList<Map<String, Any>> = ArrayList()
-            for (dealership in listDealerships) {
-                val dealershipInfo: MutableMap<String, Any> = HashMap()
-                dealershipInfo["id"] = dealership.dealerId
-                dealershipInfo["name"] = dealership.dealerName
-                dealershipInfo["receivingEnabled"] = dealership.statusAcquiringVehicle
-                dealershipInfo["rentingEnabled"] = dealership.rentingVehicles
-                dealershipInfoList.add(dealershipInfo)
-            }
-            return dealershipInfoList
+    fun calcDealershipInfoList(): List<Map<Key, Any>> {
+        val dealershipInfoList: MutableList<Map<Key, Any>> = ArrayList()
+        for (dealership in listDealerships) {
+            val dealershipInfo = EnumMap<Key, Any>(Key::class.java)
+
+            Key.entries.forEach { key -> key.fillData(dealershipInfo, dealership) }
+            /*
+            dealershipInfo["id"] = dealership.dealerId
+            dealershipInfo["name"] = dealership.dealerName
+            dealershipInfo["receivingEnabled"] = dealership.statusAcquiringVehicle
+            dealershipInfo["rentingEnabled"] = dealership.rentingVehicles
+             */
+            dealershipInfoList.add(dealershipInfo)
         }
+        return dealershipInfoList
+    }
 
     /**
      * Updates the Dealership receiving status for Vehicles.

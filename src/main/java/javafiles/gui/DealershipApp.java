@@ -1,7 +1,6 @@
 package javafiles.gui;
 
 
-import javafiles.dataaccessfiles.FileIOFactory;
 import javafiles.domainfiles.Company;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -18,12 +17,12 @@ import static javafiles.gui.FXMLPath.MAIN_SCREEN;
 public class DealershipApp extends Application {
 /**
      * Called when the application is stopped.
-     * Writes the current inventory data to a file using {@link AppStateManager#writeToInventory()}.
+     * Writes the current inventory data to a file using {@link AppStateManager#writeToInventoryFile()}.
      */
 
     @Override
     public void stop() {
-        AppStateManager.writeToInventory();
+        AppStateManager.writeToInventoryFile();
     }
 
 

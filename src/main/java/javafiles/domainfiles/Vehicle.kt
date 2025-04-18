@@ -145,19 +145,12 @@ abstract class Vehicle(
     }
 
     /**
-     * Retrieves Vehicle data and puts it into the provided [MutableMap].
+     * Retrieves Vehicle data and returns a [Map] with the given data.
      * Each key-value pair in the map represents an attribute of the vehicle.
-     *
-     * @param map The [MutableMap] to be filled with data from the Vehicle. The keys are expected to be instances of [Key].
      */
-    fun getDataMap(map: MutableMap<Key, Any>) {
-        map?.put(Key.VEHICLE_ID, vehicleId)
-        map?.put(Key.VEHICLE_MANUFACTURER, vehicleManufacturer)
-        map?.put(Key.VEHICLE_MODEL, vehicleModel)
-        map?.put(Key.VEHICLE_PRICE, vehiclePrice)
-        map?.put(Key.VEHICLE_PRICE_UNIT, priceUnit)
-        map?.put(Key.VEHICLE_ACQUISITION_DATE, acquisitionDate ?: 0L)
-        map?.put(Key.VEHICLE_TYPE, vehicleType)
-        map?.put(Key.VEHICLE_RENTAL_STATUS, rentalStatus)
+    fun getDataMap(): Map<Key, Any> {
+        val map: MutableMap<Key, Any> = EnumMap(Key::class.java)
+        Key.entries.forEach { key -> key.fillData(map, this) }
+        return map
     }
 }

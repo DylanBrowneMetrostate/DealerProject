@@ -101,24 +101,12 @@ class Dealership(
      * Takes a Map with information about a Vehicle, creates that Vehicle and adds to inventory.
      */
     fun dataToInventory(map: MutableMap<Key, Any>): Boolean {
-        val vehicle: Vehicle? = try {
-            vehicleFactory.createVehicle(map as Map<Key?, Any?>?)
-        } catch (e: Exception) {
-            val wrapped = ReadWriteException(e)
-            Key.REASON_FOR_ERROR.putValid(map, wrapped)
-            return false
-        }
-
-        if (vehicle == null) {
-            val wrapped = ReadWriteException(MissingCriticalInfoException("Vehicle Creation Failed"))
-            Key.REASON_FOR_ERROR.putValid(map, wrapped)
-            return false
-        }
-
         return try {
+            val vehicle = vehicleFactory.createVehicle(map)
             addIncomingVehicle(vehicle)
             true
         } catch (e: Exception) {
+            //TODO: Less generic Exceptions?
             val wrapped = ReadWriteException(e)
             Key.REASON_FOR_ERROR.putValid(map, wrapped)
             false
@@ -130,6 +118,7 @@ class Dealership(
             addAll(saleVehicles)
             addAll(rentalVehicles)
         }
+
     @Throws(
         InvalidVehicleTypeException::class,
         VehicleAlreadyExistsException::class,
@@ -152,9 +141,7 @@ class Dealership(
 
         val newVehicle = vehicleFactory.createVehicle(vehicleType, vehicleId, vehicleModel, vehiclePrice)
         vehicleFactory.fillVehicle(newVehicle, vehicleManufacturer, acquisitionDate, priceUnit, null)
-        if (newVehicle != null) {
-            this.addIncomingVehicle(newVehicle)
-        }
+        this.addIncomingVehicle(newVehicle)
     }
 
     /**
@@ -205,20 +192,17 @@ class Dealership(
         rentalVehicles.add(rental)
     }
 
-    val dataMap: List<Map<Key, Any>>
-        get() {
+    fun calcDealerMapData(): Map<Key, Any> {
+        val map = EnumMap<Key, Any>(Key::class.java)
+        Key.entries.forEach { key-> key.fillData(map, this) }
+        return map
+    }
+
+    fun calcDataMap(): List<Map<Key, Any>>{
             val list: MutableList<Map<Key, Any>> = ArrayList()
             val fullInventory: List<Vehicle> = this.totalInventory
 
-            for (vehicle in fullInventory) {
-                val map: MutableMap<Key, Any> = HashMap()
-                Key.DEALERSHIP_ID.putValid(map, dealerId)
-                Key.DEALERSHIP_NAME.putValid(map, dealerName)
-                Key.DEALERSHIP_RECEIVING_STATUS.putValid(map, statusAcquiringVehicle)
-                Key.DEALERSHIP_RENTING_STATUS.putValid(map, rentingVehicles)
-                vehicle.getDataMap(map)
-                list.add(map)
-            }
+            for (vehicle in fullInventory) { list.add( vehicle.getDataMap() ) }
             return list
         }
 

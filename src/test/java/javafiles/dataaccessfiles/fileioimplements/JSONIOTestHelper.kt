@@ -67,7 +67,7 @@ object JSONIOTestHelper {
             map[Key.VEHICLE_PRICE_UNIT] = "dollar"
             map[Key.VEHICLE_ACQUISITION_DATE] = 100L
 
-            Assertions.assertEquals(Key.entries.size - 1, map.size)
+            Assertions.assertEquals(Key.entries.size - 2, map.size)
 
             return map
         }

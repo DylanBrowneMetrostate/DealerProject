@@ -4,6 +4,7 @@ import javafiles.Key
 import javafiles.customexceptions.InvalidPriceException
 import javafiles.customexceptions.InvalidVehicleTypeException
 import javafiles.customexceptions.MissingCriticalInfoException
+import javafiles.customexceptions.ReadWriteException
 import java.util.*
 
 /**
@@ -17,13 +18,13 @@ class VehicleCreator private constructor() // Private constructor
      * If val is null, setter is not called and the value of the parameter in vehicle is not changed.
      *
      * @param vehicle The [Vehicle] who's value is being set.
-     * @param val The value that is being set
+     * @param value The value that is being set
      * @param setter The setter method in [Vehicle] that is being called.
      * @param <T> The type of parameter that is being set by the setter.
     </T> */
-    private fun <T> setIfNotNull(vehicle: Vehicle?, `val`: T?, setter: (Vehicle?, T) -> Unit) {
-        if (`val` != null) {
-            setter(vehicle, `val`)
+    private fun <T> setIfNotNull(vehicle: Vehicle?, value: T?, setter: (Vehicle?, T) -> Unit) {
+        if (value != null) {
+            setter(vehicle, value)
         }
     }
 
@@ -48,7 +49,7 @@ class VehicleCreator private constructor() // Private constructor
      * @return A [Vehicle] object of the specified type.
      * @throws InvalidVehicleTypeException If the vehicle type is not supported.
      */
-    override fun createVehicle(type: String?, id: String?, model: String?, price: Long?): Vehicle? {
+    override fun createVehicle(type: String?, id: String?, model: String?, price: Long?): Vehicle {
         if (type == null) {
             throw InvalidVehicleTypeException("Null Vehicle type.")
         }
@@ -90,9 +91,7 @@ class VehicleCreator private constructor() // Private constructor
      * @throws MissingCriticalInfoException If critical information (type, id, model) is missing.
      */
     @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
-    override fun createVehicle(map: Map<Key?, Any?>?): Vehicle? {
-        if (map.isNullOrEmpty()) return null
-
+    override fun createVehicle(map: Map<Key, Any>): Vehicle {
         val type = map[Key.VEHICLE_TYPE] as? String
         val id = map[Key.VEHICLE_ID] as? String
         val model = map[Key.VEHICLE_MODEL] as? String

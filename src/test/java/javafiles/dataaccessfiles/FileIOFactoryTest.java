@@ -1,7 +1,6 @@
 package javafiles.dataaccessfiles;
 
 import javafiles.Key;
-import javafiles.customexceptions.BadCharException;
 import javafiles.customexceptions.BadExtensionException;
 import javafiles.customexceptions.ReadWriteException;
 import javafiles.dataaccessfiles.fileioimplements.FileIOReader;
@@ -139,14 +138,9 @@ public class FileIOFactoryTest {
      */
     public static List<Map<Key, Object>> getMaps(FileIOReader fileIO, int mapNum) {
         List<Map<Key, Object>> maps;
-        try {
-            maps = fileIO.readInventory();
-            assertEquals(mapNum, maps.size());
-            return maps;
-        } catch (ReadWriteException e) {
-            fail(e);
-        }
-        return null;
+        maps = fileIO.readInventory();
+        assertEquals(mapNum, maps.size());
+        return maps;
     }
 
     /**

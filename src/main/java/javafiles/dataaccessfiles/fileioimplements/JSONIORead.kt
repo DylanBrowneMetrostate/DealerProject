@@ -27,7 +27,7 @@ internal class JSONIORead
  * @param file The full path of the file to be opened or created.
  * @throws ReadWriteException Thrown if the mode is an invalid char.
  */
-    @Throws(ReadWriteException::class) constructor(override val file: File) : FileIOReader {
+    constructor(override val file: File) : FileIOReader {
     /**
      * Takes a JSONObject and creates and returns a Map. Fills the Map with the
      * data from the JSONObject with the same keys as keys. If any keys are absent,
@@ -36,7 +36,7 @@ internal class JSONIORead
      * @param jObj The JSONObject that data is being extracted from.
      */
     private fun readJSONObject(jObj: JSONObject): Map<Key, Any> {
-        val map: MutableMap<Key, Any> = EnumMap(javafiles.Key::class.java)
+        val map: MutableMap<Key, Any> = EnumMap(Key::class.java)
 
         for (key in Key.entries) {
             val keyStr = key.key
