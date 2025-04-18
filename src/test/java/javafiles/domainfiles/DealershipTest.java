@@ -33,7 +33,7 @@ class DealershipTest {
 
     @Test
     public void testConstructor() {
-        assertEquals("D001", dealership.getDealerId());
+        assertEquals("D001", dealership.dealerId);
         assertEquals("Test Dealership", dealership.getDealerName());
         assertTrue(dealership.getStatusAcquiringVehicle());
         assertFalse(dealership.getRentingVehicles());
