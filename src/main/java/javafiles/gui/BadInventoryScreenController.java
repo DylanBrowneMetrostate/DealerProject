@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -117,7 +118,7 @@ public class BadInventoryScreenController {
 
         badInventoryTableView.setEditable(true);
 
-        // Initialize the "Select" column with checkboxes (already editable)
+        // Initialize the "Select" column with checkboxes
         selectColumn.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectColumn.setCellFactory(tc -> new CheckBoxTableCell<>());
 
@@ -331,10 +332,38 @@ public class BadInventoryScreenController {
         sceneManager.switchScene(MAIN_SCREEN);
     }
 
+    /**
+     * Handles the action when the "Discard Selected" button is clicked.
+     * It iterates through the items in the bad inventory table and removes
+     * any rows where the selection checkbox is checked. After removing the
+     * selected items from the displayed list, it refreshes the table view
+     * and displays an alert to the user confirming the removal.
+     *
+     * @param event The action event triggered by the "Discard Selected" button.
+     */
     @FXML
-    private void handleDiscardSelected(ActionEvent event) {
-        System.out.println("Discarding selected items: ");
-        // TODO: Implement logic to discard these items
+    private void handleDiscardSelected(ActionEvent event)
+    {
+        List<MapWithSelection> itemsToRemove = new ArrayList<>();
+
+        // iterate through current items in the badInventoryTableView
+        for (MapWithSelection item : badInventoryList)
+        {
+            if (item.isSelected())
+            {
+                itemsToRemove.add(item);
+            }
+        }
+
+        // If there are items to discard
+        if (!itemsToRemove.isEmpty())
+        {
+            badInventoryList.removeAll(itemsToRemove);
+            showAlert("The selected vehicles have been discarded");
+        }
+        else {showAlert("Please select a vehicle to discard");}
+
+        badInventoryTableView.refresh();
     }
 
     @FXML
