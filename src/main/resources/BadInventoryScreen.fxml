@@ -40,13 +40,13 @@
         <TableView fx:id="badInventoryTableView" editable="true" BorderPane.alignment="CENTER">
             <columns>
                 <TableColumn fx:id="selectColumn" maxWidth="50.0" minWidth="50.0" prefWidth="50.0" text="Select" />
-                <TableColumn fx:id="dealershipIdColumn" text="Dealership ID" />
+                <TableColumn fx:id="dealershipIdColumn" text="*Dealership ID" />
                 <TableColumn fx:id="dealershipNameColum" text ="Dealership Name" />
-                <TableColumn fx:id="vehicleIdColumn" text="Vehicle ID" />
-                <TableColumn fx:id="vehicleTypeColumn" text="Type" />
+                <TableColumn fx:id="vehicleIdColumn" text="*Vehicle ID" />
+                <TableColumn fx:id="vehicleTypeColumn" text="*Type" />
                 <TableColumn fx:id="vehicleManufacturerColumn" text="Manufacturer" />
-                <TableColumn fx:id="vehicleModelColumn" text="Model" />
-                <TableColumn fx:id="vehiclePriceColumn" text="Price" />
+                <TableColumn fx:id="vehicleModelColumn" text="*Model" />
+                <TableColumn fx:id="vehiclePriceColumn" text="*Price" />
                 <TableColumn fx:id="priceUnitColumn" text="Price Unit" />
                 <TableColumn fx:id="acquisitionDateColumn" text="Acquisition Date" />
                 <TableColumn fx:id="errorReasonColumn" text="Error Reason" />
