@@ -367,4 +367,20 @@ public class AppStateManager {
         writeToInventoryFile();
     }
 
+
+    /**
+     * Method takes a {@link Map} object containing {@link Key} {@link Object} pair representing a
+     * vehicle in the badInventoryList. Method attempts to remove the vehicle if it exists in the
+     * badInventoryList.
+     *
+     * @param targetItem target map representing vehicle in badInventoryList
+     */
+    public static void removeItemFromBadInventory(Map<Key,Object> targetItem)
+    {
+        if(badInventoryList.contains(targetItem))
+        {
+            badInventoryList.remove(targetItem);
+        }
+    }
+
 }
