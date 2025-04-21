@@ -92,6 +92,7 @@ public class BadInventoryScreenController {
     private final ObservableList<String> vehicleTypeOptions = FXCollections.observableArrayList("SUV", "Sedan", "Sports car", "Pickup");
 
     private List<Map<Key, Object>> badInventoryData;
+    private boolean firstLoad = true; // flag to indicate whether this is the first time user accesses the screen
 
     /**
      * Sets the bad inventory data to be displayed in the table. This data is
@@ -102,6 +103,11 @@ public class BadInventoryScreenController {
     public void setBadInventoryData(List<Map<Key, Object>> data) {
         this.badInventoryData = AppStateManager.getBadDataInventory();
         populateTableView();
+        if (!AppStateManager.isBadInventoryScreenVisited()) {
+            showAlert("User note: Incomplete vehicle data in this table are editable \n" +
+                    "but will be discarded after the application closes.");
+            AppStateManager.setBadInventoryScreenVisited(true);
+        }
     }
 
     /**
@@ -300,7 +306,6 @@ public class BadInventoryScreenController {
 
         // Load and display the initial bad inventory data
         setBadInventoryData(AppStateManager.getBadDataInventory());
-
     }
 
     /**

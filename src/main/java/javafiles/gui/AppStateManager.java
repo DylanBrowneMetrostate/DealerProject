@@ -24,6 +24,8 @@ public class AppStateManager {
     private static String masterInventoryList = "masterInventoryList.json";
     private static Company company;
     private static ArrayList<Map<Key,Object>>  badInventoryList = new ArrayList<>();
+    private static boolean badInventoryScreenVisited = false;
+
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -119,6 +121,15 @@ public class AppStateManager {
         }
 
         return companyListVehicles;
+    }
+
+
+    public static boolean isBadInventoryScreenVisited() {
+        return badInventoryScreenVisited;
+    }
+
+    public static void setBadInventoryScreenVisited(boolean visited) {
+        badInventoryScreenVisited = visited;
     }
 
     /**
