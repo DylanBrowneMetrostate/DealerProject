@@ -92,7 +92,6 @@ public class BadInventoryScreenController {
     private final ObservableList<String> vehicleTypeOptions = FXCollections.observableArrayList("SUV", "Sedan", "Sports car", "Pickup");
 
     private List<Map<Key, Object>> badInventoryData;
-    private boolean firstLoad = true; // flag to indicate whether this is the first time user accesses the screen
 
     /**
      * Sets the bad inventory data to be displayed in the table. This data is
