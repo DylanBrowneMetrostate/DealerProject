@@ -2,6 +2,7 @@ package javafiles.gui;
 
 import javafiles.Key;
 
+import javafiles.customexceptions.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,7 +31,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DefaultStringConverter;
 
 import java.io.IOException;
-import javafiles.customexceptions.ReadWriteException;
 
 
 import static javafiles.gui.FXMLPath.MAIN_SCREEN;
@@ -102,6 +102,11 @@ public class BadInventoryScreenController {
     public void setBadInventoryData(List<Map<Key, Object>> data) {
         this.badInventoryData = AppStateManager.getBadDataInventory();
         populateTableView();
+        if (!AppStateManager.isBadInventoryScreenVisited()) {
+            showAlert("User note: Incomplete vehicle data in this table are editable \n" +
+                    "but will be discarded after the application closes.");
+            AppStateManager.setBadInventoryScreenVisited(true);
+        }
     }
 
     /**
@@ -300,7 +305,6 @@ public class BadInventoryScreenController {
 
         // Load and display the initial bad inventory data
         setBadInventoryData(AppStateManager.getBadDataInventory());
-
     }
 
     /**
@@ -352,6 +356,7 @@ public class BadInventoryScreenController {
             if (item.isSelected())
             {
                 itemsToRemove.add(item);
+                AppStateManager.removeItemFromBadInventory(item.getData()); // remove from List tracking bad items in AppStateManager
             }
         }
 
@@ -366,11 +371,109 @@ public class BadInventoryScreenController {
         badInventoryTableView.refresh();
     }
 
+    /**
+     * Handles the action when the upload button is clicked for selected items
+     * in the bad inventory table view.
+     *<p>
+     * This method iterates through the items in the {@code badInventoryTableView}.
+     * For each selected item, it checks if the item has been selected, the item
+     * is checked to see if each required field is complete and if true then
+     * the item is added to {@link javafiles.domainfiles.Dealership} if the item is not complete
+     * or there are any issues adding the item, an alert will prompt.
+     *
+     * @param event event The {@link ActionEvent} triggered by clicking the upload button.
+     */
     @FXML
     private void handleUploadSelected(ActionEvent event) {
-        System.out.println("Uploading selected items: ");
-        // TODO: Implement logic to upload these items
+        List<MapWithSelection> selectedItemsToUpload = new ArrayList<>();
+        List<String> errorMessages = new ArrayList<>();
+        boolean uploadFlag = true;
+        boolean hasIncompleteItems = false;
+
+        // Iterate through the current items in the badInventoryTableView
+        for (MapWithSelection item : badInventoryList) {
+            if (item.isSelected()) {
+                selectedItemsToUpload.add(item);
+            }
+        }
+
+        // Process the selected items for upload
+        for (MapWithSelection wrapper : selectedItemsToUpload) {
+            Map<Key, Object> data = wrapper.getData();
+            boolean isComplete = true;
+            StringBuilder missingFieldsMessage = new StringBuilder();
+            String vehicleId = String.valueOf(data.get(Key.VEHICLE_ID));
+            String itemIdentifier = (data.get(Key.VEHICLE_ID) != null && !vehicleId.trim().isEmpty()) ?
+                    "Vehicle ID: " + vehicleId : "Selected Vehicle";
+
+            if (data.get(Key.DEALERSHIP_ID) == null || String.valueOf(data.get(Key.DEALERSHIP_ID)).trim().isEmpty()) {
+                isComplete = false;
+                missingFieldsMessage.append("Dealership ID, ");
+            }
+            // Check for empty Vehicle ID
+            if (data.get(Key.VEHICLE_ID) == null || vehicleId.trim().isEmpty()) {
+                isComplete = false;
+                missingFieldsMessage.append("Vehicle ID, ");
+            }
+            if (data.get(Key.VEHICLE_MODEL) == null || String.valueOf(data.get(Key.VEHICLE_MODEL)).trim().isEmpty()) {
+                isComplete = false;
+                missingFieldsMessage.append("Vehicle Model, ");
+            }
+            if (data.get(Key.VEHICLE_PRICE) == null) {
+                isComplete = false;
+                missingFieldsMessage.append("Vehicle Price, ");
+            } else {
+                try {
+                    if (data.get(Key.VEHICLE_PRICE) instanceof String) {
+                        Long.parseLong((String) data.get(Key.VEHICLE_PRICE));
+                    }
+                } catch (NumberFormatException e) {
+                    isComplete = false;
+                    missingFieldsMessage.append("Vehicle Price (invalid format), ");
+                }
+            }
+            if (data.get(Key.VEHICLE_TYPE) == null || String.valueOf(data.get(Key.VEHICLE_TYPE)).trim().isEmpty()) {
+                isComplete = false;
+                missingFieldsMessage.append("Vehicle Type, ");
+            }
+
+            if (isComplete) {
+                // attempt to add the vehicle
+                try {
+                    AppStateManager.manualVehicleAdd(data);
+                    badInventoryList.remove(wrapper);
+                    badInventoryData.removeIf(badDataMap ->
+                            badDataMap.get(Key.VEHICLE_ID).equals(data.get(Key.VEHICLE_ID)));
+                } catch (VehicleAlreadyExistsException | InvalidPriceException |
+                         DealershipNotAcceptingVehiclesException | InvalidVehicleTypeException |
+                         MissingCriticalInfoException e) {
+                    uploadFlag = false;
+                    showAlert(e.getMessage());
+                }
+            } else {
+                hasIncompleteItems = true;
+                if (missingFieldsMessage.length() > 0) {
+                    // Remove the trailing comma and space
+                    missingFieldsMessage.delete(missingFieldsMessage.length() - 2, missingFieldsMessage.length());
+                    errorMessages.add(itemIdentifier + " is missing: " + missingFieldsMessage);
+                } else {
+                    errorMessages.add(itemIdentifier + " is missing required information.");
+                }
+            }
+        }
+
+        // Refresh the table view to reflect removals
+        badInventoryTableView.refresh();
+
+        if (!selectedItemsToUpload.isEmpty() && !hasIncompleteItems && uploadFlag) {
+            showAlert("Selected vehicles have been added successfully.");
+        } else if (selectedItemsToUpload.isEmpty()) {
+            showAlert("No vehicles were selected for upload.");
+        } else if (hasIncompleteItems) {
+            showAlert("The following selected vehicles have missing information:\n" + String.join("\n", errorMessages));
+        }
     }
+
 
     /**
      * Displays an alert dialog with the given message.

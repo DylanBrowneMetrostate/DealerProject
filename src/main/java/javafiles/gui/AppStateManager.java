@@ -24,6 +24,8 @@ public class AppStateManager {
     private static String masterInventoryList = "masterInventoryList.json";
     private static Company company;
     private static ArrayList<Map<Key,Object>>  badInventoryList = new ArrayList<>();
+    private static boolean badInventoryScreenVisited = false;
+
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -119,6 +121,15 @@ public class AppStateManager {
         }
 
         return companyListVehicles;
+    }
+
+
+    public static boolean isBadInventoryScreenVisited() {
+        return badInventoryScreenVisited;
+    }
+
+    public static void setBadInventoryScreenVisited(boolean visited) {
+        badInventoryScreenVisited = visited;
     }
 
     /**
@@ -358,6 +369,22 @@ public class AppStateManager {
         Dealership dealer = company.findDealership(dealershipId);
         dealer.removeFromInventory(targetVehicle);
         writeToInventoryFile();
+    }
+
+
+    /**
+     * Method takes a {@link Map} object containing {@link Key} {@link Object} pair representing a
+     * vehicle in the badInventoryList. Method attempts to remove the vehicle if it exists in the
+     * badInventoryList.
+     *
+     * @param targetItem target map representing vehicle in badInventoryList
+     */
+    public static void removeItemFromBadInventory(Map<Key,Object> targetItem)
+    {
+        if(badInventoryList.contains(targetItem))
+        {
+            badInventoryList.remove(targetItem);
+        }
     }
 
 }
