@@ -17,63 +17,17 @@ import java.util.*
  *
  * Authors: Patrick McLucas, Christopher Engelhart
  */
-class Dealership(
+class Dealership (
     val dealerId: String,
     var dealerName: String
 ) {
-    val saleVehicles: ArrayList<Vehicle> = ArrayList()
-    val rentalVehicles: ArrayList<Vehicle> = ArrayList()
+    val inventory: MutableList<Vehicle> = ArrayList()
     var statusAcquiringVehicle: Boolean = true
     var rentingVehicles = false
 
-    //fun getRentingVehicles(): Boolean {
-    //    return rentingVehicles
-   // }
-
-   // fun setName(name: String) {
-   //     this.dealerName = name
-   // }
-
-    fun setReceivingVehicle(status: Boolean) {
-        statusAcquiringVehicle = Objects.requireNonNullElse(status, true)
-    }
-
-    //fun setRentingVehicles(status: Boolean) {
-    //    rentingVehicles = Objects.requireNonNullElse(status, false)
-  // }
-
-    @Throws(VehicleNotFoundException::class)
-    fun getVehicleFromSalesInventory(vehicleID: String): Vehicle {
-        for (vehicle in saleVehicles) {
-            if (vehicle.vehicleId == vehicleID) {
-                return vehicle
-            }
-        }
-        throw VehicleNotFoundException("Vehicle with ID: $vehicleID not found in sales inventory.")
-    }
-
-    @Throws(VehicleNotFoundException::class)
-    fun getVehicleFromRentalInventory(vehicleID: String): Vehicle {
-        for (vehicle in rentalVehicles) {
-            if (vehicle.vehicleId == vehicleID) {
-                return vehicle
-            }
-        }
-        throw VehicleNotFoundException("Vehicle with ID: $vehicleID not found in rental inventory.")
-    }
-
-    private fun isVehicleInInventory(newVehicle: Vehicle, inventory: List<Vehicle>): Boolean {
-        for (vehicle in inventory) {
-            if (vehicle.vehicleId == newVehicle.vehicleId) {
-                return true
-            }
-        }
-        return false
-    }
-
-    fun isVehicleInInventoryById(newId: String): Boolean {
+    fun inventoryContainsById(newId: String): Boolean {
         val cleanId = newId.trim().replace("\\s+".toRegex(), "")
-        for (vehicle in totalInventory) {
+        for (vehicle in inventory) {
             val existingVehicleId = vehicle.vehicleId.trim().replace("\\s+".toRegex(), "")
             if (existingVehicleId.equals(cleanId, ignoreCase = true)) {
                 return true
@@ -81,6 +35,7 @@ class Dealership(
         }
         return false
     }
+
     @Throws(DealershipNotAcceptingVehiclesException::class, VehicleAlreadyExistsException::class)
     fun addIncomingVehicle(newVehicle: Vehicle) {
         if (!statusAcquiringVehicle) {
@@ -89,12 +44,15 @@ class Dealership(
             )
         }
 
-        if (isVehicleInInventory(newVehicle, saleVehicles) ||
-            isVehicleInInventory(newVehicle, rentalVehicles)) {
+        if (inventoryContainsById(newVehicle.vehicleId)) {
             throw VehicleAlreadyExistsException("Vehicle ID: ${newVehicle.vehicleId} already exists in inventory of dealership $dealerId.")
         }
 
-        saleVehicles.add(newVehicle)
+        inventory.add(newVehicle)
+    }
+
+    fun removeFromInventory(targetVehicle: Vehicle) {
+        inventory.remove(targetVehicle)
     }
 
     /**
@@ -102,7 +60,7 @@ class Dealership(
      */
     fun dataToInventory(map: MutableMap<Key, Any>): Boolean {
         return try {
-            val vehicle = vehicleFactory.createVehicle(map)
+            val vehicle = vehicleFactory.createFullVehicle(map)
             addIncomingVehicle(vehicle)
             true
         } catch (e: Exception) {
@@ -113,12 +71,6 @@ class Dealership(
         }
     }
 
-    val totalInventory: ArrayList<Vehicle>
-        get() = ArrayList<Vehicle>().apply {
-            addAll(saleVehicles)
-            addAll(rentalVehicles)
-        }
-
     @Throws(
         InvalidVehicleTypeException::class,
         VehicleAlreadyExistsException::class,
@@ -126,22 +78,8 @@ class Dealership(
         InvalidPriceException::class,
         MissingCriticalInfoException::class
     )
-    fun manualVehicleAdd(
-        vehicleId: String,
-        vehicleManufacturer: String?,
-        vehicleModel: String?,
-        vehiclePrice: Long,
-        acquisitionDate: Long?,
-        vehicleType: String?,
-        priceUnit: String?
-    ) {
-        if (vehiclePrice <= 0) {
-            throw InvalidPriceException("Error: Vehicle price must be a positive value. Vehicle ID: $vehicleId was not added.")
-        }
-
-        val newVehicle = vehicleFactory.createVehicle(vehicleType, vehicleId, vehicleModel, vehiclePrice)
-        vehicleFactory.fillVehicle(newVehicle, vehicleManufacturer, acquisitionDate, priceUnit, null)
-        this.addIncomingVehicle(newVehicle)
+    fun manualVehicleAdd(map: Map<Key, Any>) {
+        addIncomingVehicle(vehicleFactory.createFullVehicle(map))
     }
 
     /**
@@ -150,46 +88,8 @@ class Dealership(
      */
     @Throws(RentalException::class)
     fun updateVehicleRental(vehicle: Vehicle) {
-        if (!vehicle.vehicleType.equals("Sports car", ignoreCase = true)) {
-            if (vehicle.rentalStatus) {
-                vehicle.disableRental()
-            } else {
-                vehicle.enableRental()
-            }
-        } else {
-            throw VehicleNotRentableException("Sports car types are not currently rentable")
-        }
-
-        if (saleVehicles.contains(vehicle)) {
-            saleVehicles.remove(vehicle)
-            rentalVehicles.add(vehicle)
-        } else {
-            rentalVehicles.remove(vehicle)
-            saleVehicles.add(vehicle)
-        }
-    }
-    @Throws(
-        IllegalArgumentException::class,
-        VehicleAlreadyExistsException::class,
-        DealershipNotRentingException::class,
-        VehicleNotRentableException::class
-    )
-    fun addRentalVehicle(rental: Vehicle) {
-        requireNotNull(rental) { "Rental vehicle is null." }
-
-        if (!rentingVehicles) {
-            throw DealershipNotRentingException("Dealership $dealerId is not currently providing rental services.")
-        }
-
-        if (!rental.rentalStatus) {
-            throw VehicleNotRentableException("Vehicle ${rental.vehicleId} is not currently rentable.")
-        }
-
-        if (isVehicleInInventory(rental, rentalVehicles)) {
-            throw VehicleAlreadyExistsException("Vehicle ${rental.vehicleId} is already in the rental inventory.")
-        }
-
-        rentalVehicles.add(rental)
+        // Will throw RentalException if vehicle is a sports car
+        vehicle.rentalStatus = !vehicle.rentalStatus
     }
 
     fun calcDealerMapData(): Map<Key, Any> {
@@ -199,20 +99,10 @@ class Dealership(
     }
 
     fun calcDataMap(): List<Map<Key, Any>>{
-            val list: MutableList<Map<Key, Any>> = ArrayList()
-            val fullInventory: List<Vehicle> = this.totalInventory
+        val list: MutableList<Map<Key, Any>> = ArrayList()
 
-            for (vehicle in fullInventory) { list.add( vehicle.getDataMap() ) }
-            return list
-        }
-
-    /**
-     * Removes a vehicle from the dealership's inventory.
-     */
-    fun removeVehicleFromInventory(targetVehicle: Vehicle) {
-        requireNotNull(targetVehicle) { "Target vehicle is null." }
-        saleVehicles.remove(targetVehicle)
-        rentalVehicles.remove(targetVehicle)
+        for (vehicle in inventory) { list.add( vehicle.getDataMap() ) }
+        return list
     }
 
     /**
@@ -228,14 +118,22 @@ class Dealership(
             throw DuplicateSenderException("Sender and receiver dealership can not be the same")
         }
 
-        removeVehicleFromInventory(transferVehicle)
         receivingDealer.addIncomingVehicle(transferVehicle)
+        inventory.remove(transferVehicle)
     }
+    
     override fun toString(): String {
+        var rentedVehicleNum = 0
+        for (vehicle in inventory) {
+            if (vehicle.rentalStatus) {
+                rentedVehicleNum++
+            }
+        }
+
         var str = "Dealership ID: $dealerId\n"
         str += "Dealership Name: ${Objects.requireNonNullElse(dealerName, "No name on file.")}\n"
-        str += "Sales Inventory Num: ${saleVehicles.size}\n"
-        str += "Rental Inventory Num: ${rentalVehicles.size}"
+        str += "Sales Inventory Num: ${inventory.size - rentedVehicleNum}\n"
+        str += "Rental Inventory Num: $rentedVehicleNum"
         return str
     }
 

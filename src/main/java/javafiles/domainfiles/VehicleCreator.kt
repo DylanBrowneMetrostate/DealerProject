@@ -4,7 +4,7 @@ import javafiles.Key
 import javafiles.customexceptions.InvalidPriceException
 import javafiles.customexceptions.InvalidVehicleTypeException
 import javafiles.customexceptions.MissingCriticalInfoException
-import javafiles.customexceptions.ReadWriteException
+import javafiles.customexceptions.SportsCarRentalNotAllowedException
 import java.util.*
 
 /**
@@ -20,8 +20,8 @@ class VehicleCreator private constructor() // Private constructor
      * @param vehicle The [Vehicle] who's value is being set.
      * @param value The value that is being set
      * @param setter The setter method in [Vehicle] that is being called.
-     * @param <T> The type of parameter that is being set by the setter.
-    </T> */
+     * @param [T] The type of parameter that is being set by the setter.
+     */
     private fun <T> setIfNotNull(vehicle: Vehicle?, value: T?, setter: (Vehicle?, T) -> Unit) {
         if (value != null) {
             setter(vehicle, value)
@@ -38,7 +38,7 @@ class VehicleCreator private constructor() // Private constructor
         setIfNotNull(vehicle, make) { v, m -> v?.vehicleManufacturer = m }
         setIfNotNull(vehicle, date) { v, d -> v?.acquisitionDate = d }
         setIfNotNull(vehicle, priceUnit) { v, u -> v?.priceUnit = u }
-        setIfNotNull(vehicle, rentalStatus) { v, state -> v?.setRental(state)}
+        setIfNotNull(vehicle, rentalStatus) { v, state -> v?.rentalStatus = state }
     }
 
     /**
@@ -89,9 +89,11 @@ class VehicleCreator private constructor() // Private constructor
      * @throws InvalidVehicleTypeException If the vehicle type is invalid.
      * @throws InvalidPriceException If the price is invalid.
      * @throws MissingCriticalInfoException If critical information (type, id, model) is missing.
+     * @throws SportsCarRentalNotAllowedException If [SportsCar] is marked as rented.
      */
-    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
-    override fun createVehicle(map: Map<Key, Any>): Vehicle {
+    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class,
+            MissingCriticalInfoException::class, SportsCarRentalNotAllowedException::class)
+    override fun createFullVehicle(map: Map<Key, Any>): Vehicle {
         val type = map[Key.VEHICLE_TYPE] as? String
         val id = map[Key.VEHICLE_ID] as? String
         val model = map[Key.VEHICLE_MODEL] as? String
@@ -102,7 +104,11 @@ class VehicleCreator private constructor() // Private constructor
         val make = map[Key.VEHICLE_MANUFACTURER] as? String
         val date = map[Key.VEHICLE_ACQUISITION_DATE] as? Long
         val unit = map[Key.VEHICLE_PRICE_UNIT] as? String
-        val rentalStatus = map[Key.VEHICLE_RENTAL_STATUS] as? Boolean
+        var rentalStatus = map[Key.VEHICLE_RENTAL_STATUS] as? Boolean
+
+        if (rentalStatus != null && vehicle is SportsCar && rentalStatus == false) {
+            rentalStatus = null
+        }
 
         fillVehicle(vehicle, make, date, unit, rentalStatus)
 

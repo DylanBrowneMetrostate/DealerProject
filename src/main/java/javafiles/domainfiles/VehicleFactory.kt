@@ -4,6 +4,7 @@ import javafiles.Key
 import javafiles.customexceptions.InvalidPriceException
 import javafiles.customexceptions.InvalidVehicleTypeException
 import javafiles.customexceptions.MissingCriticalInfoException
+import javafiles.customexceptions.SportsCarRentalNotAllowedException
 
 /**
  * Defines the contract for a factory that creates [Vehicle] objects.
@@ -16,6 +17,7 @@ interface VehicleFactory {
     @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
     fun createVehicle(type: String?, id: String?, model: String?, price: Long?): Vehicle
 
-    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class, MissingCriticalInfoException::class)
-    fun createVehicle(map: Map<Key, Any>): Vehicle
+    @Throws(InvalidVehicleTypeException::class, InvalidPriceException::class,
+            MissingCriticalInfoException::class, SportsCarRentalNotAllowedException::class)
+    fun createFullVehicle(map: Map<Key, Any>): Vehicle
 }

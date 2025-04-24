@@ -1,5 +1,7 @@
 package javafiles.domainfiles
 
+import javafiles.customexceptions.RentalException
+
 /**
  * The `DefaultRentalStrategy` class implements the [RentalStrategy] interface
  * and provides the default rental behavior for most vehicle types (excluding sports cars).
@@ -8,21 +10,10 @@ package javafiles.domainfiles
  */
 class DefaultRentalStrategy : RentalStrategy {
     /**
-     * Enables the rental status of the specified [Vehicle] by setting its rental status to true.
+     * Notifies [DefaultRentalStrategy] that the rental status is attempting to be changed.
+     * The default strategy is to allow all changes, so the method does not throw a [RentalException].
      *
-     * @param vehicle The [Vehicle] to enable for rental.
+     * @param value The attempted new value of the rental status.
      */
-    override fun enableRental(vehicle: Vehicle?) {
-        vehicle?.setRental(true)
-    }
-
-
-    /**
-     * Disables the rental status of the specified [Vehicle] by setting its rental status to false.
-     *
-     * @param vehicle The [Vehicle] to disable for rental.
-     */
-    override fun disableRental(vehicle: Vehicle?) {
-        vehicle?.setRental(false)
-    }
+    override fun updateTo(value: Boolean) { }
 }

@@ -61,12 +61,12 @@ internal class XMLIO
      * the tag name or attribute name is a valid name for the given [XMLKey]s.
      * >
      * If a [XMLKey] was found but the nodeValue at that [XMLKey] causes an issue,
-     * Key.REASON_FOR_ERROR + the reason for the issue is appended to map instead. Overrides the
-     * previous Key.REASON_FOR_ERROR key values in the map
+     * [Key.REASON_FOR_ERROR] + the reason for the issue is appended to [map] instead. Overrides the
+     * previous [Key.REASON_FOR_ERROR] key values in the map
      *
      * @param keys An array of [XMLKey]s containing the [Key] to be searched for
      * from tagName.
-     * @param map The [Map] that the nodeValue or Key.REASON_FOR_ERROR is appended on to,
+     * @param map The [Map] that the nodeValue or [Key.REASON_FOR_ERROR] is appended on to,
      * if the tagName is found.
      * @param tagName The tag name of the [Node] that is being evaluated on this call.
      * @param nodeValue The value of the [Node] that is being evaluated. If the node was
@@ -76,18 +76,15 @@ internal class XMLIO
      */
     private fun parseNode(keys: Array<XMLKey>?, map: MutableMap<Key, Any>?, tagName: String, nodeValue: String) {
         // want to change value, but (seemingly) not allowed to without name shadowing.
-        @Suppress("NAME_SHADOWING") var nodeValue = nodeValue
+        @Suppress("NAME_SHADOWING")
+        val nodeValue = nodeValue.trim()
 
-        if (map == null || keys == null) {
-            return
-        }
-
-        nodeValue = nodeValue.trim()
+        if (map == null || keys == null) { return }
 
         for (key in keys) {
             if (key.xmlName.equals(tagName, ignoreCase = true)) {
                 // If there is an issue with the val, the first value is saved and the rest discarded.
-                val nodeValCast = if (key.key.className == java.lang.Long::class.java.name) {
+                val nodeValCast = if (key.key.clazz == java.lang.Long::class) {
                     try {
                         nodeValue.toLong()
                     } catch (e: NumberFormatException) {
@@ -136,7 +133,7 @@ internal class XMLIO
      * If the [Node].getNodeName() equals the stopTag, the [Node] that is being
      * evaluated is added to [List]<[Node]> haltedNodes. If a [Node] has a
      * [Key] being searched for, the calculated value of the [Node] is added to map
-     * with that [Key]. If there is an error with the found value, Key.REASON_FOR_ERROR is
+     * with that [Key]. If there is an error with the found value, [Key.REASON_FOR_ERROR] is
      * appended instead.
      *
      * @param node The [Node] that is being evaluated.
@@ -223,7 +220,7 @@ internal class XMLIO
         for (dealerNode in haltedNodesDealer) {
 
             val haltedNodesVehicle: MutableList<Node> = ArrayList()
-            val dealerMap: MutableMap<Key, Any> = EnumMap(javafiles.Key::class.java)
+            val dealerMap: MutableMap<Key, Any> = EnumMap(Key::class.java)
             readXMLObject(dealerNode, dealerKeys, dealerMap, "Vehicle", haltedNodesVehicle)
 
             for (vehicleNode in haltedNodesVehicle) {
@@ -240,9 +237,10 @@ internal class XMLIO
     /**
      * Reads and returns the data stored in the file of this object.
      *
-     * @return A List of Map<Key></Key>, Object>s that correspond to the
+     * @return A List of [Map]<[Key], [Object]>s that correspond to the
      * data stored in the XML file for this object.
-     * @throws ReadWriteException Thrown if not in read ('r') mode.
+     * @throws ReadWriteException Thrown if there is an error in the XML file preventing it
+     *  from being read by the [DocumentBuilder].
      */
     @Throws(ReadWriteException::class)
     override fun readInventory(): List<Map<Key, Any>> {

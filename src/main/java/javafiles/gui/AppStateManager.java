@@ -250,13 +250,6 @@ public class AppStateManager {
         Set<String> existingIds = new HashSet<>();
 
         for (Map<Key, Object> info : dealershipInfoList) {
-            /*
-            String id = (String) info.get(Key.DEALERSHIP_ID);
-            String name = (String) info.get(Key.DEALERSHIP_NAME);
-            Boolean receivingEnabled = (Boolean) info.get(Key.DEALERSHIP_RECEIVING_STATUS);
-            Boolean rentingEnabled = (Boolean) info.get(Key.DEALERSHIP_RENTING_STATUS);
-            */
-
             String id = Key.DEALERSHIP_ID.getVal(info, String.class);
             String name = Key.DEALERSHIP_NAME.getVal(info, String.class);
             Boolean receivingEnabled = Key.DEALERSHIP_RECEIVING_STATUS.getVal(info, Boolean.class);
@@ -287,11 +280,11 @@ public class AppStateManager {
 
     /**
         Sets receiving status for a {@link Dealership} in the company.
-        Method calls {@link Dealership#setReceivingVehicle(boolean)}
+        Method calls {@link Dealership#setStatusAcquiringVehicle(boolean)}
      */
     public static void setDealershipReceivingStatus(Dealership dealership, boolean status)
     {
-        dealership.setReceivingVehicle(status);
+        dealership.setStatusAcquiringVehicle(status);
         writeToInventoryFile();
     }
 
@@ -340,20 +333,20 @@ public class AppStateManager {
 
     /**
      * Gets the complete inventory of a given dealership.
-     * Method calls {@link Dealership#getTotalInventory()}.
+     * Method calls {@link Dealership#getInventory()}.
      *
      * @param dealershipId dealership ID of target dealership
      * @return ArrayList<Vehicle> represent a complete collection of target dealership's sales and rental inventory
      */
-    public static ArrayList<Vehicle> getDealershipCompleteInventory(String dealershipId) {
+    public static List<Vehicle> getDealershipCompleteInventory(String dealershipId) {
         Dealership dealer = company.findDealership(dealershipId);
-        return dealer.getTotalInventory();
+        return dealer.getInventory();
     }
 
 
     /**
      * Removes target {@link Vehicle} from a {@link Dealership} inventory.
-     * Method calls {@link Dealership#removeVehicleFromInventory(Vehicle)}
+     * Method calls {@link Dealership#removeFromInventory(Vehicle)}
      *
      * @param dealershipId target dealership to remove vehicle from
      * @param targetVehicle vehicle to be removed
@@ -363,7 +356,7 @@ public class AppStateManager {
     public static void removeVehicleFromDealership(String dealershipId, Vehicle targetVehicle) throws IllegalArgumentException
     {
         Dealership dealer = company.findDealership(dealershipId);
-        dealer.removeVehicleFromInventory(targetVehicle);
+        dealer.removeFromInventory(targetVehicle);
         writeToInventoryFile();
     }
 

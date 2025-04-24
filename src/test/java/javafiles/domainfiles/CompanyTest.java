@@ -55,14 +55,14 @@ public class CompanyTest {
 
     @Test
     public void testGetDealershipCompleteInventory() {
-        ArrayList<Vehicle> inventory = dealership1.getTotalInventory();
+        List<Vehicle> inventory = dealership1.getInventory();
         assertEquals(1, inventory.size());
-        assertEquals("V001", inventory.get(0).getVehicleId());
+        assertEquals("V001", inventory.getFirst().getVehicleId());
     }
 
     @Test
     public void testUpdateVehicleRental_enablesAndMoves() throws Exception {
-        mockVehicle.disableRental(); // currently not rentable
+        mockVehicle.setRentalStatus(false); // currently not rentable
         dealership1.updateVehicleRental(mockVehicle);
         assertTrue(mockVehicle.getRentalStatus());
     }
@@ -76,17 +76,17 @@ public class CompanyTest {
 
     @Test
     public void testRemoveVehicleFromDealership() {
-        dealership1.removeVehicleFromInventory(mockVehicle);
-        assertTrue(dealership1.getTotalInventory().isEmpty());
+        dealership1.removeFromInventory(mockVehicle);
+        assertTrue(dealership1.getInventory().isEmpty());
     }
 
     @Test
     public void testDealershipVehicleTransfer_success() throws Exception {
-        dealership2.setReceivingVehicle(true);
+        dealership2.setStatusAcquiringVehicle(true);
         dealership1.dealershipVehicleTransfer(dealership2, mockVehicle);
 
-        assertFalse(dealership1.getTotalInventory().contains(mockVehicle));
-        assertTrue(dealership2.getTotalInventory().contains(mockVehicle));
+        assertFalse(dealership1.getInventory().contains(mockVehicle));
+        assertTrue(dealership2.getInventory().contains(mockVehicle));
     }
 
     @Test

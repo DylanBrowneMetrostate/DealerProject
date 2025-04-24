@@ -43,9 +43,9 @@ public class VehicleTest {
     @Test
     public void testRentalStatusToggle() throws RentalException {
         assertFalse(suv.getRentalStatus());
-        suv.enableRental();
+        suv.setRentalStatus(true);
         assertTrue(suv.getRentalStatus());
-        suv.disableRental();
+        suv.setRentalStatus(false);
         assertFalse(suv.getRentalStatus());
     }
 

@@ -101,10 +101,9 @@ class KeyTest {
     public void putValidNullTest() {
         Map<Key, Object> map = new HashMap<>();
         for (Key key: getEntriesAsArray()) {
-            try {
-                key.putValid(map, null);
+            if (key.putValid(map, null)) {
                 fail("Null added");
-            } catch (NullPointerException _) {}
+            }
         }
     }
 
@@ -163,20 +162,25 @@ class KeyTest {
     public void getValGoodMapAllGoodVal() {
         Map<Key, Object> map = getGoodMap();
         for (Key key: getEntries()) {
-            String className = key.getClassName();
+            Class<?> clazz = key.getClazzJava();
 
             try {
-                if (className.equals(String.class.getName())) {
+                if (clazz.equals(String.class)) {
                     key.getVal(map, String.class);
-                } else if (className.equals(Long.class.getName())) {
+                    continue;
+                } else if (clazz.equals(Long.class)) {
                     key.getVal(map, Long.class);
-                } else if (className.equals(Boolean.class.getName())) {
+                    continue;
+                } else if (clazz.equals(Boolean.class)) {
                     key.getVal(map, Boolean.class);
-                } else if (className.equals(ReadWriteException.class.getName())) {
+                    continue;
+                } else if (clazz.equals(ReadWriteException.class)) {
                     key.getVal(map, ReadWriteException.class);
+                    continue;
                 }
+                fail("Function not called for " + key.getKey());
             } catch (ClassCastException e) {
-                fail(e.getMessage() + '\n' + key.getKey() + " not found in map with: " + className);
+                fail(e.getMessage() + '\n' + key.getKey() + " not found in map with: " + clazz);
             }
         }
     }
@@ -218,19 +222,19 @@ class KeyTest {
     public void getValGoodMapAllBadVal() {
         Map<Key, Object> map = getGoodMap();
         for (Key key: getEntries()) {
-            String className = key.getClassName();
+            Class<?> clazz = key.getClazzJava();
 
             try {
-                if (className.equals(String.class.getName())) {
+                if (clazz.equals(String.class)) {
                     key.getVal(map, Boolean.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Long.class.getName())) {
+                } else if (clazz.equals(Long.class)) {
                     key.getVal(map, String.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Boolean.class.getName())) {
+                } else if (clazz.equals(Boolean.class)) {
                     key.getVal(map, Long.class);
                     fail("No exception thrown.");
-                } else if (className.equals(ReadWriteException.class.getName())) {
+                } else if (clazz.equals(ReadWriteException.class)) {
                     key.getVal(map, Integer.class);
                     fail("No exception thrown.");
                 }
@@ -297,19 +301,19 @@ class KeyTest {
     public void getValBadMapAllGoodVal() {
         Map<Key, Object> map = getBadMap();
         for (Key key: getEntries()) {
-            String className = key.getClassName();
+            Class<?> clazz = key.getClazzJava();
 
             try {
-                if (className.equals(String.class.getName())) {
+                if (clazz.equals(String.class)) {
                     key.getVal(map, String.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Long.class.getName())) {
+                } else if (clazz.equals(Long.class)) {
                     key.getVal(map, Long.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Boolean.class.getName())) {
+                } else if (clazz.equals(Boolean.class)) {
                     key.getVal(map, Boolean.class);
                     fail("No exception thrown.");
-                } else if (className.equals(ReadWriteException.class.getName())) {
+                } else if (clazz.equals(ReadWriteException.class)) {
                     key.getVal(map, ReadWriteException.class);
                     fail("No exception thrown.");
                 }
@@ -358,19 +362,19 @@ class KeyTest {
     public void getValBadMapAllBadVal() {
         Map<Key, Object> map = getBadMap();
         for (Key key: getEntries()) {
-            String className = key.getClassName();
+            Class<?> clazz = key.getClazzJava();
 
             try {
-                if (className.equals(String.class.getName())) {
+                if (clazz.equals(String.class)) {
                     key.getVal(map, Boolean.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Long.class.getName())) {
+                } else if (clazz.equals(Long.class)) {
                     key.getVal(map, String.class);
                     fail("No exception thrown.");
-                } else if (className.equals(Boolean.class.getName())) {
+                } else if (clazz.equals(Boolean.class)) {
                     key.getVal(map, Long.class);
                     fail("No exception thrown.");
-                } else if (className.equals(ReadWriteException.class.getName())) {
+                } else if (clazz.equals(ReadWriteException.class)) {
                     key.getVal(map, Integer.class);
                     fail("No exception thrown.");
                 }

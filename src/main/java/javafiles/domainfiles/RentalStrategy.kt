@@ -5,33 +5,16 @@ import javafiles.customexceptions.RentalException
 /**
  * The `RentalStrategy` interface defines the contract for implementing different rental strategies
  * for [Vehicle] objects. This interface allows for flexible and extensible rental management,
- * enabling the application to support various rental policies without modifying core vehicle logic.
+ * enabling the application to support various rental policies without modifying core [Vehicle] logic.
  */
 interface RentalStrategy {
     /**
-     * Enables the rental status of the specified [Vehicle].
+     * Notifies the [RentalStrategy] that the rental status is attempting to be changed, so
+     * a [RentalException] can be thrown if applicable.
      *
-     *
-     * This method should perform all necessary actions to mark the vehicle as rented, such as updating
-     * the vehicle's rental status indicating that it's currently rented.
-     *
-     * @param vehicle The [Vehicle] to enable for rental.
-     * @throws RentalException If an error occurs during the rental enabling process.
+     * @param value The attempted new value of the rental status.
+     * @throws RentalException when the rental strategy prevents updating for the given values.
      */
     @Throws(RentalException::class)
-    fun enableRental(vehicle: Vehicle?)
-
-
-    /**
-     * Enables the rental status of the specified [Vehicle].
-     *
-     *
-     * This method should perform all necessary actions to mark the vehicle as not currently
-     * rented by changing the vehicle's rental status.
-     *
-     * @param vehicle The [Vehicle] to enable for rental.
-     * @throws RentalException If an error occurs during the rental enabling process.
-     */
-    @Throws(RentalException::class)
-    fun disableRental(vehicle: Vehicle?)
+    fun updateTo(value: Boolean)
 }

@@ -85,13 +85,8 @@ class Company {
         MissingCriticalInfoException::class
     )
     fun manualVehicleAdd(map: Map<Key, Any>, dealer: Dealership) {
-        val id: String = map[Key.VEHICLE_ID] as? String ?: throw MissingCriticalInfoException("Vehicle ID is missing.")
-        val make: String? = map[Key.VEHICLE_MANUFACTURER] as? String
-        val model: String = map[Key.VEHICLE_MODEL] as? String ?: throw MissingCriticalInfoException("Vehicle model is missing.")
-        val price: Long = (map[Key.VEHICLE_PRICE] as? Number)?.toLong() ?: throw MissingCriticalInfoException("Vehicle price is missing or invalid.")
-        val acqDate: Long? = (map[Key.VEHICLE_ACQUISITION_DATE] as? Number)?.toLong()
-        val type: String = map[Key.VEHICLE_TYPE] as? String ?: throw MissingCriticalInfoException("Vehicle type is missing.")
-        val unit: String? = map[Key.VEHICLE_PRICE_UNIT] as? String
+        val id = try { Key.VEHICLE_ID.getVal(map, String::class) }
+        catch (_: ClassCastException) { throw MissingCriticalInfoException("Vehicle ID is missing.") }
 
         if (isVehicleInInventoryById(id)) {
             throw VehicleAlreadyExistsException(
@@ -99,7 +94,7 @@ class Company {
                         "Vehicle ID: $id was not added to dealership ${dealer.dealerId}."
             )
         }
-        dealer.manualVehicleAdd(id, make, model, price, acqDate, type, unit)
+        dealer.manualVehicleAdd(map)
     }
 
     /**
@@ -109,7 +104,7 @@ class Company {
      * @return weather the Vehicle is in the company.
      */
     private fun isVehicleInInventoryById(id: String?): Boolean {
-        return listDealerships.any { it.isVehicleInInventoryById(id ?: "") }
+        return listDealerships.any { it.inventoryContainsById(id ?: "") }
     }
 
     private fun mapToInventory(map: MutableMap<Key, Any>, newDealers: MutableMap<Dealership, Map<Key, Any>>): Map<Key, Any>? {
@@ -119,6 +114,7 @@ class Company {
         val name = map[Key.DEALERSHIP_NAME] as? String
 
         if (id == null) { return Key.addErrorReason(map, MissingCriticalInfoException("No dealerID.")) }
+
         var dealership = findDealership(id)
 
         if (map.containsKey(Key.DUMMY_VEHICLE) && Key.DUMMY_VEHICLE.getVal(map, Boolean::class)) {
@@ -130,8 +126,8 @@ class Company {
             return null
         }
 
-        val vId = map[Key.VEHICLE_ID] as? String
-        if (vId != null && isVehicleInInventoryById(vId)) {
+        val vehicleId = map[Key.VEHICLE_ID] as? String
+        if (vehicleId != null && isVehicleInInventoryById(vehicleId)) {
             return Key.addErrorReason(map, VehicleAlreadyExistsException("Duplicate Vehicle ID in inventory"))
         }
 
@@ -167,7 +163,7 @@ class Company {
         // Apply receiving and renting status only to newly created dealerships
         for ((dealer, statusMap) in newlyCreatedDealerships) {
             dealer.rentingVehicles = statusMap[Key.DEALERSHIP_RENTING_STATUS] as? Boolean ?: false
-            dealer.setReceivingVehicle(statusMap[Key.DEALERSHIP_RECEIVING_STATUS] as? Boolean ?: true)
+            dealer.statusAcquiringVehicle = statusMap[Key.DEALERSHIP_RECEIVING_STATUS] as? Boolean ?: true
         }
 
         return badInventoryMaps
@@ -252,7 +248,7 @@ class Company {
             if (!dealer.statusAcquiringVehicle) {
                 println("Dealership ${dealer.dealerId} is already set to not receive vehicles.")
             } else {
-                dealer.setReceivingVehicle(false)
+                dealer.statusAcquiringVehicle = false
                 println("Vehicle receiving status for dealership ${dealer.dealerId} has been disabled.")
             }
             return false
