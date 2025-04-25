@@ -7,38 +7,39 @@ participant "selectedItemsToUpload" as SelectedItems
 participant "wrapper: MapWithSelection" as Wrapper
 participant "data: Map<Key, Object>" as Data
 participant "missingFieldsMessage: StringBuilder" as StringBuilder
-participant "AppState: AppStateManager" as AppState
-participant "badInventoryList" as BadInventoryList
-participant "badInventoryData" as BadInventoryData
+participant AppStateManager
+participant badInventoryList
+participant badInventoryData
 participant "errorMessages" as ErrorMessages
+participant TableView
 
 ' Variables
 note left of Wrapper: isComplete = true
 note left of StringBuilder: missingFieldsMessage = new StringBuilder()
 note left of Data: vehicleId
 note left of Data: itemIdentifier
-
-
-
+note left of SelectedItems: hasIncompleteItems = false
+note left of SelectedItems: uploadFlag = true
+note left of ErrorMessages: errorMessages = new ArrayList()
 
 
 Actor -> Controller : handleUploadSelected()
-loop badInventoryList
-alt item.isSelected()
-Controller -> Controller: selectedItemsToUpload.add(item)
-end
+loop for each item in badInventoryList
+  alt item.isSelected()
+    Controller -> Controller: selectedItemsToUpload.add(item)
+  end
 end
 
 
 ' Loop through selected items
-loop for each wrapper in SelectedItems
-  SelectedItems -> Wrapper: get data()
+loop for each wrapper in selectedItemsToUpload
+  SelectedItems -> Wrapper: getData()
   Wrapper -> Data: getData()
   note left of Data: vehicleId = String.valueOf(data.get(Key.VEHICLE_ID))
   note left of Data: itemIdentifier = "Selected Vehicle"
 
   ' Check Dealership ID
-  alt data.get(Key.DEALERSHIP_ID) == null or String.valueOf(data.get(Key.DEALERSHIP_ID).trim().isEmpty()
+  alt data.get(Key.DEALERSHIP_ID) == null or String.valueOf(data.get(Key.DEALERSHIP_ID)).trim().isEmpty()
     note left of Wrapper: isComplete = false
     StringBuilder -> StringBuilder: append("Dealership ID, ")
   end
@@ -50,7 +51,7 @@ loop for each wrapper in SelectedItems
   end
 
   ' Check Vehicle Model
-  alt data.get(Key.VEHICLE_MODEL) == null or String.valueOf(data.get(Key.VEHICLE_MODEL).trim().isEmpty()
+  alt data.get(Key.VEHICLE_MODEL) == null or String.valueOf(data.get(Key.VEHICLE_MODEL)).trim().isEmpty()
     note left of Wrapper: isComplete = false
     StringBuilder -> StringBuilder: append("Vehicle Model, ")
   end
@@ -61,7 +62,7 @@ loop for each wrapper in SelectedItems
     StringBuilder -> StringBuilder: append("Vehicle Price, ")
   else data.get(Key.VEHICLE_PRICE) != null
     alt data.get(Key.VEHICLE_PRICE) instanceof String
-      note left of Data: Long.parseLong(data.get(VEHICLE_PRICE)
+      note left of Data: Long.parseLong(String.valueOf(data.get(Key.VEHICLE_PRICE)))
       opt NumberFormatException occurred
         note left of Wrapper: isComplete = false
         StringBuilder -> StringBuilder: append("Vehicle Price (invalid format), ")
@@ -70,7 +71,7 @@ loop for each wrapper in SelectedItems
   end
 
   ' Check Vehicle Type
-  alt data.get(Key.VEHICLE_TYPE) == null or String.valueOf(data.get(Key.VEHICLE_TYPE).trim().isEmpty()
+  alt data.get(Key.VEHICLE_TYPE) == null or String.valueOf(data.get(Key.VEHICLE_TYPE)).trim().isEmpty()
     note left of Wrapper: isComplete = false
     StringBuilder -> StringBuilder: append("Vehicle Type, ")
   end
@@ -78,14 +79,15 @@ loop for each wrapper in SelectedItems
   ' If all checks pass
   alt isComplete == true then
     ' Attempt to add the vehicle
-    AppState -> AppState: manualVehicleAdd(data)
-    BadInventoryScreenController -> BadInventoryList: badInventoryList.remove(wrapper)
-    BadInventoryScreenController -> BadInventoryData: removeIf(badDataMap -> badDataMap.get(key.VEHICLE_ID).equals(data.get(Key.VEHICLE_ID)
+    Controller -> AppStateManager: manualVehicleAdd(data)
+    Controller -> badInventoryList: badInventoryList.remove(Wrapper)
+    Controller -> badInventoryData: removeIf(badDataMap -> badDataMap.get(Key.VEHICLE_ID).equals(data.get(Key.VEHICLE_ID)))
   else
     note left of SelectedItems: hasIncompleteItems = true
     alt missingFieldsMessage.length() > 0
-      StringBuilder -> StringBuilder: delete()
-      ErrorMessages -> ErrorMessages: add(itemIdentifier + " is missing: " + missingFieldsMessage)
+      StringBuilder -> StringBuilder: delete(missingFieldsMessage.length() - 2, missingFieldsMessage.length())
+      ErrorMessages -> ErrorMessages: add(itemIdentifier + " is missing: " + missingFieldsMessage.toString())
+      StringBuilder -> StringBuilder: setLength(0)
     else
       ErrorMessages -> ErrorMessages: add(itemIdentifier + " is missing required information.")
     end alt
@@ -112,15 +114,17 @@ loop for each wrapper in SelectedItems
   ' Refresh TableView
   Controller -> TableView : refresh()
 
-  ' Final Alert Logic
-  alt SelectedItems.isEmpty()
-    Controller -> Controller : showAlert("No vehicles were selected for upload.")
-  else
-    alt hasIncompleteItems == true
-      Controller -> Controller : showAlert("The following selected vehicles have missing information:\n" + String.join("\n", errorMessages))
-    else uploadFlag == true
-      Controller -> Controller : showAlert("Selected vehicles have been added successfully.")
-
-
 end loop
+
+' Final Alert Logic
+alt SelectedItems.isEmpty()
+  Controller -> Controller : showAlert("No vehicles were selected for upload.")
+else
+  alt hasIncompleteItems == true
+    Controller -> Controller : showAlert("The following selected vehicles have missing information:\n" + String.join("\n", errorMessages))
+  else uploadFlag == true
+    Controller -> Controller : showAlert("Selected vehicles have been added successfully.")
+  end alt
+end alt
+
 @enduml

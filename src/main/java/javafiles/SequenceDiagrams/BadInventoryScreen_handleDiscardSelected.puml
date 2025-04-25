@@ -1,0 +1,34 @@
+@startuml
+
+' Participants
+participant Actor
+participant "BadInventoryScreenController" as Controller27267542
+participant AppStateManager
+participant TableView
+
+
+Actor -> Controller: handleDiscardSelected()
+
+' Iterate through items in badInventory Table
+loop for each item in badInventoryList
+  alt item.isSelected()
+    Controller -> Controller: itemsToRemove.add(item)
+    Controller -> AppStateManager: removeItemFromBadInventory()
+  end alt
+end loop
+
+' remove items from itemsToRemove if not empty
+alt !itemsToRemove.isEmpty()
+    Controller -> Controller: badInventoryList.removeAll(itemsToRemove)
+    Controller -> Controller: showAlert("The selected vehicles have been discarded")
+else showAlert("Please select a vehicle to discard")
+end alt
+
+Controller -> TableView: refresh()
+
+
+
+
+
+
+@enduml

@@ -124,10 +124,22 @@ public class AppStateManager {
     }
 
 
+    /**
+     * Method to return the badInventoryScreenVisited status, if true the screen has been visited
+     * else it has not.
+     *
+     * @return boolean value representing whether the BadInventoryScreen has been visited.
+     */
     public static boolean isBadInventoryScreenVisited() {
         return badInventoryScreenVisited;
     }
 
+    /**
+     * Method to indicate whether the BadInventoryScreen has already been visited in the current instance
+     * of the program.
+     *
+     * @param visited boolean variable to indicate whether the BadInventoryScreen has already been visited
+     */
     public static void setBadInventoryScreenVisited(boolean visited) {
         badInventoryScreenVisited = visited;
     }
@@ -282,6 +294,17 @@ public class AppStateManager {
         return dealershipRows;
     }
 
+    /**
+        Method calls {@link Company#manualVehicleAdd(Map, Dealership)} to add a vehicle to a
+        designated {@link Dealership}
+
+        @param map Map<Key, Object> representing the vehicle to be added
+        @throws VehicleAlreadyExistsException if a vehicle with the same vehicle ID already exists in the company
+        @throws InvalidPriceException if a vehicle price is not a valid integer, > 0
+        @throws DealershipNotAcceptingVehiclesException if the dealership is not currently accepting new vehicles
+        @throws InvalidVehicleTypeException if new vehicle has an unsupported vehicle type
+        @throws MissingCriticalInfoException if the vehicle is missing critical information such as ID, type, price, model
+     */
     public static void manualVehicleAdd(Map<Key, Object> map) throws VehicleAlreadyExistsException,
             InvalidPriceException, DealershipNotAcceptingVehiclesException,
             InvalidVehicleTypeException, MissingCriticalInfoException {
