@@ -1,0 +1,126 @@
+@startuml
+
+' Participants
+participant Actor
+participant "BadInventoryScreenController" as Controller
+participant "selectedItemsToUpload" as SelectedItems
+participant "wrapper: MapWithSelection" as Wrapper
+participant "data: Map<Key, Object>" as Data
+participant "missingFieldsMessage: StringBuilder" as StringBuilder
+participant "AppState: AppStateManager" as AppState
+participant "badInventoryList" as BadInventoryList
+participant "badInventoryData" as BadInventoryData
+participant "errorMessages" as ErrorMessages
+
+' Variables
+note left of Wrapper: isComplete = true
+note left of StringBuilder: missingFieldsMessage = new StringBuilder()
+note left of Data: vehicleId
+note left of Data: itemIdentifier
+
+
+
+
+
+Actor -> Controller : handleUploadSelected()
+loop badInventoryList
+alt item.isSelected()
+Controller -> Controller: selectedItemsToUpload.add(item)
+end
+end
+
+
+' Loop through selected items
+loop for each wrapper in SelectedItems
+  SelectedItems -> Wrapper: get data()
+  Wrapper -> Data: getData()
+  note left of Data: vehicleId = String.valueOf(data.get(Key.VEHICLE_ID))
+  note left of Data: itemIdentifier = "Selected Vehicle"
+
+  ' Check Dealership ID
+  alt data.get(Key.DEALERSHIP_ID) == null or String.valueOf(data.get(Key.DEALERSHIP_ID).trim().isEmpty()
+    note left of Wrapper: isComplete = false
+    StringBuilder -> StringBuilder: append("Dealership ID, ")
+  end
+
+  ' Check Vehicle ID
+  alt data.get(Key.VEHICLE_ID) == null or vehicleId.trim().isEmpty()
+    note left of Wrapper: isComplete = false
+    StringBuilder -> StringBuilder: append("Vehicle ID, ")
+  end
+
+  ' Check Vehicle Model
+  alt data.get(Key.VEHICLE_MODEL) == null or String.valueOf(data.get(Key.VEHICLE_MODEL).trim().isEmpty()
+    note left of Wrapper: isComplete = false
+    StringBuilder -> StringBuilder: append("Vehicle Model, ")
+  end
+
+  ' Check Vehicle Price
+  alt data.get(Key.VEHICLE_PRICE) == null
+    note left of Wrapper: isComplete = false
+    StringBuilder -> StringBuilder: append("Vehicle Price, ")
+  else data.get(Key.VEHICLE_PRICE) != null
+    alt data.get(Key.VEHICLE_PRICE) instanceof String
+      note left of Data: Long.parseLong(data.get(VEHICLE_PRICE)
+      opt NumberFormatException occurred
+        note left of Wrapper: isComplete = false
+        StringBuilder -> StringBuilder: append("Vehicle Price (invalid format), ")
+      end opt
+    end alt
+  end
+
+  ' Check Vehicle Type
+  alt data.get(Key.VEHICLE_TYPE) == null or String.valueOf(data.get(Key.VEHICLE_TYPE).trim().isEmpty()
+    note left of Wrapper: isComplete = false
+    StringBuilder -> StringBuilder: append("Vehicle Type, ")
+  end
+
+  ' If all checks pass
+  alt isComplete == true then
+    ' Attempt to add the vehicle
+    AppState -> AppState: manualVehicleAdd(data)
+    BadInventoryScreenController -> BadInventoryList: badInventoryList.remove(wrapper)
+    BadInventoryScreenController -> BadInventoryData: removeIf(badDataMap -> badDataMap.get(key.VEHICLE_ID).equals(data.get(Key.VEHICLE_ID)
+  else
+    note left of SelectedItems: hasIncompleteItems = true
+    alt missingFieldsMessage.length() > 0
+      StringBuilder -> StringBuilder: delete()
+      ErrorMessages -> ErrorMessages: add(itemIdentifier + " is missing: " + missingFieldsMessage)
+    else
+      ErrorMessages -> ErrorMessages: add(itemIdentifier + " is missing required information.")
+    end alt
+  end
+
+  ' Handle potential exceptions after manualVehicleAdd
+  alt #red VehicleAlreadyExistsException occurred
+    note left of SelectedItems: uploadFlag = false
+    SelectedItems -> SelectedItems: showAlert(e.getMessage())
+  else #red InvalidPriceException occurred
+    note left of SelectedItems: uploadFlag = false
+    SelectedItems -> SelectedItems: showAlert(e.getMessage())
+  else #red DealershipNotAcceptingVehiclesException occurred
+    note left of SelectedItems: uploadFlag = false
+    SelectedItems -> SelectedItems: showAlert(e.getMessage())
+  else #red InvalidVehicleTypeException occurred
+    note left of SelectedItems: uploadFlag = false
+    SelectedItems -> SelectedItems: showAlert(e.getMessage())
+  else #red MissingCriticalInfoException occurred
+    note left of SelectedItems: uploadFlag = false
+    SelectedItems -> SelectedItems: showAlert(e.getMessage())
+  end alt
+
+  ' Refresh TableView
+  Controller -> TableView : refresh()
+
+  ' Final Alert Logic
+  alt SelectedItems.isEmpty()
+    Controller -> Controller : showAlert("No vehicles were selected for upload.")
+  else
+    alt hasIncompleteItems == true
+      Controller -> Controller : showAlert("The following selected vehicles have missing information:\n" + String.join("\n", errorMessages))
+    else uploadFlag == true
+      Controller -> Controller : showAlert("Selected vehicles have been added successfully.")
+
+
+end loop
+@enduml
