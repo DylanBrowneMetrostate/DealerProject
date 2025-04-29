@@ -2,7 +2,7 @@
 
 ' Participants
 participant Actor
-participant "BadInventoryScreenController" as Controller27267542
+participant "BadInventoryScreenController" as Controller
 participant AppStateManager
 participant TableView
 
