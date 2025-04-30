@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="javafiles.dataaccessfiles.FileIOFactoryTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-04-30T23:14:51" hostname="PATRICK" time="0.037">
+  <properties/>
+  <testcase name="buildableBadExtensionRead()" classname="javafiles.dataaccessfiles.FileIOFactoryTest" time="0.033"/>
+  <testcase name="buildableBadExtensionWrite()" classname="javafiles.dataaccessfiles.FileIOFactoryTest" time="0.002"/>
+  <system-out><![CDATA[Tested folder: \src\test\resources\
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

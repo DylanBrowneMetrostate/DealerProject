@@ -1,0 +1,47 @@
+<Dealers>
+    <Dealer>
+        <Name>
+            name
+            <Id>d_id</Id>
+        </Name>
+        <Vehicle>
+            <Type>
+                pickup
+                <Id>
+                    v_id0
+                    <Price>
+                        17000
+                        <Model>
+                            model
+                        </Model>
+                    </Price>
+                </Id>
+            </Type>
+        </Vehicle>
+        <Vehicle>
+            <Model>
+                <Make>
+                    <Unit>
+                        <Id>v_id1</Id>
+                        pounds
+                    </Unit>
+                    make
+                    <Price>
+                        17000
+                        <Type>sports car</Type>
+                    </Price>
+                </Make>
+                model
+            </Model>
+        </Vehicle>
+        <Vehicle>
+            <Id>v_id2<Type>suv</Type><Unit>dol<Model>model</Model>lars</Unit><Price>16500</Price></Id>
+        </Vehicle>
+    </Dealer>
+    <Dealer>
+        <Id>d_id2<Name>name2</Name></Id>
+        <Vehicle>
+            <Type><Id>v_id3</Id>sports <Model>model2</Model>car<Price>18000</Price></Type>
+        </Vehicle>
+    </Dealer>
+</Dealers>

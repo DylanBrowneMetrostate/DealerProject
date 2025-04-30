@@ -1,0 +1,40 @@
+{"car_inventory":
+[
+  {
+    "dealership_id":"12513",
+    "vehicle_type":"suv",
+    "vehicle_manufacturer":"Ford",
+    "vehicle_model":"Explorer",
+    "vehicle_id":"48934j",
+    "price": 20123,
+    "acquisition_date": 1515354694451
+  },
+  {
+    "price": 10000,
+    "vehicle_model":"Model",
+    "dealership_rental_status":false,
+    "vehicle_type":"SUV",
+    "dealership_name":"d_name",
+    "dealership_receiving_status":true,
+    "dealership_id":"d_id",
+    "vehicle_manufacturer":"manufacture",
+    "vehicle_id":"v_id",
+    "vehicle_rental_status":false,
+    "price_unit": "dollar",
+    "acquisition_date": 100
+  },
+  {
+    "price_unit":"dollars",
+    "price":50444,
+    "vehicle_model":"Model 3",
+    "dealership_rental_status":false,
+    "vehicle_type":"Sedan",
+    "dealership_name":"l",
+    "dealership_receiving_status":false,
+    "dealership_id":"12513",
+    "vehicle_manufacturer":"Tesla",
+    "vehicle_id":"83883",
+    "vehicle_rental_status":false,
+    "acquisition_date":1515354694451}
+]
+}
