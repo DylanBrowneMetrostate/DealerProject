@@ -26,6 +26,7 @@ public class InventoryScreenController
     public Button btnRemoveVehicle;
     public Button btnAddVehicle;
     public Button btnViewInventory;
+    public Button btnSaveToInventory;
 
     /**
      * Handles the action when the back button is clicked.
@@ -103,6 +104,11 @@ public class InventoryScreenController
     private void handleViewCompanyInventory() throws IOException {
         SceneManager sceneManager = SceneManager.getInstance(null);
         sceneManager.switchScene(VIEW_INVENTORY);
+    }
+
+    @FXML
+    private void handleSaveToInventory() throws IOException {
+        AppStateManager.writeToInventoryFileWithChoice();
     }
 
     }

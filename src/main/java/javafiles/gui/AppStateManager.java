@@ -231,6 +231,19 @@ public class AppStateManager {
         }
     }
 
+    protected static void writeToInventoryFileWithChoice() {
+        Map<Map<Key, Object>, List<Map<Key, Object>>> data = company.calcDataMap();
+        String path = FileIOFactory.getInstance().selectFileWriterPath();
+
+        if (path == null) {return;}
+
+        try {
+            FileIOWriter fileIO = FileIOFactory.getInstance().buildNewFileIOWriter(path);
+            fileIO.writeInventory(data);
+        } catch (ReadWriteException e) {
+            JOptionPane.showMessageDialog(null, "Inventory could not be written.");
+        }
+    }
 
     /**
      * Retrieves a list of all dealership IDs from the Company.

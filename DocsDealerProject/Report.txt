@@ -1,0 +1,15 @@
+At the end of the last phase of this project we were able to read our old data
+files for our company from JSON as well as the new data files for our new dealerships
+that were saved in XML. We were able to write all of that data to the old data format in
+JSON. However, we were, at that time, unable to save data for dealerships with no
+vehicles in them. We also had allowed for the ability to manually add vehicles, the
+ability of transferring vehicles between dealerships, the marking of vehicles as rented,
+the creation of new dealerships, and the removal of vehicles from dealerships.
+
+In this phase of the project, we worked on refactoring our domain and data access
+files to be written in the Kotlin programming language. We also fixed the error of
+not being able to save data for dealerships with no inventory. We also reimplemented
+the ability to manually save data to a file at management’s request. In addition, we
+added a new feature that allows for bad data to be corrected in the program and added to
+the company. We believe that this feature will be useful as it allows for any files with bad
+data to be corrected directly instead of needing to be completely re-added manually.

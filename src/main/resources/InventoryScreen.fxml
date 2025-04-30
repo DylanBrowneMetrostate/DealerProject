@@ -85,4 +85,14 @@
         </padding>
     </Button>
 
+    <Button text="Save Company Inventory" fx:id="btnSaveToInventory"
+            onAction="#handleSaveToInventory"
+            GridPane.columnIndex="1" GridPane.rowIndex="3"
+            GridPane.halignment="CENTER" GridPane.valignment="CENTER"
+            minWidth="250">
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20" />
+        </padding>
+    </Button>
+
 </GridPane>
