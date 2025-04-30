@@ -85,8 +85,11 @@ class Company {
         MissingCriticalInfoException::class
     )
     fun manualVehicleAdd(map: Map<Key, Any>, dealer: Dealership) {
-        val id = try { Key.VEHICLE_ID.getVal(map, String::class) }
-        catch (_: ClassCastException) { throw MissingCriticalInfoException("Vehicle ID is missing.") }
+        val id = try {
+            Key.VEHICLE_ID.getVal(map, String::class)
+        } catch (_: ClassCastException) {
+            throw MissingCriticalInfoException("Vehicle ID is missing.")
+        }
 
         if (isVehicleInInventoryById(id)) {
             throw VehicleAlreadyExistsException(
@@ -107,13 +110,20 @@ class Company {
         return listDealerships.any { it.inventoryContainsById(id ?: "") }
     }
 
-    private fun mapToInventory(map: MutableMap<Key, Any>, newDealers: MutableMap<Dealership, Map<Key, Any>>): Map<Key, Any>? {
-        if (map.containsKey(Key.REASON_FOR_ERROR)) { return map }
+    private fun mapToInventory(
+        map: MutableMap<Key, Any>,
+        newDealers: MutableMap<Dealership, Map<Key, Any>>
+    ): Map<Key, Any>? {
+        if (map.containsKey(Key.REASON_FOR_ERROR)) {
+            return map
+        }
 
         val id = map[Key.DEALERSHIP_ID] as? String
         val name = map[Key.DEALERSHIP_NAME] as? String
 
-        if (id == null) { return Key.addErrorReason(map, MissingCriticalInfoException("No dealerID.")) }
+        if (id == null) {
+            return Key.addErrorReason(map, MissingCriticalInfoException("No dealerID."))
+        }
 
         var dealership = findDealership(id)
 
@@ -183,21 +193,6 @@ class Company {
     }
 
     /**
-     * Generates a formatted [String] of Dealership IDs.
-     *
-     * @return A tab-separated string of dealership IDs.
-     */
-    fun calcDealershipIdList(): String {
-        // TODO: Fix, this does not separate into 6 id's separated by tabs, but by 6 char's per line
-        if (listDealerships.isEmpty()) {
-            return "No valid Dealerships."
-        }
-        return listDealerships.joinToString(separator = "\t") { it.dealerId }
-            .chunked(6)
-            .joinToString(separator = "\n")
-    }
-
-    /**
      * Returns a list of all Dealership IDs.
      *
      * @return An [ArrayList] of all dealership ID strings.
@@ -216,44 +211,9 @@ class Company {
             val dealershipInfo = EnumMap<Key, Any>(Key::class.java)
 
             Key.entries.forEach { key -> key.fillData(dealershipInfo, dealership) }
-            /*
-            dealershipInfo["id"] = dealership.dealerId
-            dealershipInfo["name"] = dealership.dealerName
-            dealershipInfo["receivingEnabled"] = dealership.statusAcquiringVehicle
-            dealershipInfo["rentingEnabled"] = dealership.rentingVehicles
-             */
+
             dealershipInfoList.add(dealershipInfo)
         }
         return dealershipInfoList
-    }
-
-    /**
-     * Updates the Dealership receiving status for Vehicles.
-     *
-     * @param dealerIndex index of dealership in list
-     * @param userInput string command ("enable"/"disable")
-     * @return true if invalid input, false otherwise
-     */
-    fun changeReceivingStatus(dealerIndex: Int, userInput: String): Boolean {
-        val dealer = listDealerships[dealerIndex]
-        if (userInput.equals("enable", ignoreCase = true)) {
-            if (dealer.statusAcquiringVehicle) {
-                println("Dealership ${dealer.dealerId} is already set to receive vehicles.")
-            } else {
-                dealer.statusAcquiringVehicle = true
-                println("Vehicle receiving status for dealership ${dealer.dealerId} has been enabled.")
-            }
-            return false
-        } else if (userInput.equals("disable", ignoreCase = true)) {
-            if (!dealer.statusAcquiringVehicle) {
-                println("Dealership ${dealer.dealerId} is already set to not receive vehicles.")
-            } else {
-                dealer.statusAcquiringVehicle = false
-                println("Vehicle receiving status for dealership ${dealer.dealerId} has been disabled.")
-            }
-            return false
-        }
-        println("Invalid input. Please enter 'enable' or 'disable'.")
-        return true
     }
 }

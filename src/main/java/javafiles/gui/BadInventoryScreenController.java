@@ -446,7 +446,7 @@ public class BadInventoryScreenController {
                             badDataMap.get(Key.VEHICLE_ID).equals(data.get(Key.VEHICLE_ID)));
                 } catch (VehicleAlreadyExistsException | InvalidPriceException |
                          DealershipNotAcceptingVehiclesException | InvalidVehicleTypeException |
-                         MissingCriticalInfoException e) {
+                         MissingCriticalInfoException | IllegalArgumentException e) {
                     uploadFlag = false;
                     showAlert(e.getMessage());
                 }

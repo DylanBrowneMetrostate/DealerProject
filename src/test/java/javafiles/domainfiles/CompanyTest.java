@@ -100,24 +100,4 @@ public class CompanyTest {
         assertTrue(ids.contains("D001"));
         assertTrue(ids.contains("D002"));
     }
-
-    @Test
-    public void testGetDealershipIdList() {
-        String list = company.calcDealershipIdList();
-        assertTrue(list.contains("D001"));
-        assertTrue(list.contains("D002"));
-    }
-
-    @Test
-    public void testChangeReceivingStatus() {
-        boolean result = company.changeReceivingStatus(0, "disable");
-        assertFalse(result);
-        assertFalse(dealership1.getStatusAcquiringVehicle());
-    }
-
-    @Test
-    public void testChangeReceivingStatus_invalidInput() {
-        boolean result = company.changeReceivingStatus(0, "unknown");
-        assertTrue(result);
-    }
 }
