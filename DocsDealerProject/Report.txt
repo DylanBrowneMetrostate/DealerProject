@@ -7,8 +7,9 @@ ability of transferring vehicles between dealerships, the marking of vehicles as
 the creation of new dealerships, and the removal of vehicles from dealerships.
 
 In this phase of the project, we worked on refactoring our domain and data access
-files to be written in the Kotlin programming language. We also fixed the error of
-not being able to save data for dealerships with no inventory. We also reimplemented
+files to be written in the Kotlin programming language. We also split up the data classes
+and created interfaces to better follow the Single Responsibility principle. We also fixed the
+error of not being able to save data for dealerships with no inventory. We also reimplemented
 the ability to manually save data to a file at management’s request. In addition, we
 added a new feature that allows for bad data to be corrected in the program and added to
 the company. We believe that this feature will be useful as it allows for any files with bad

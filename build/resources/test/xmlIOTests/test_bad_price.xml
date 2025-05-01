@@ -1,8 +1,0 @@
-<Dealers>
-    <Dealer id="d_id2">
-        <Vehicle type="SUV" id="v_id4">
-            <Price>45.2</Price>
-            <Model>model3</Model>
-        </Vehicle>
-    </Dealer>
-</Dealers>
