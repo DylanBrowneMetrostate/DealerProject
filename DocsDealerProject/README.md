@@ -8,13 +8,17 @@ A tracking system for a company that owns multiple car dealerships.
   - [Adding Vehicles to a Dealership](#adding-vehicles-to-a-dealership)
   - [Removing Vehicles from a Dealership](#removing-vehicles-from-a-dealership)
   - [Transferring Vehicles Between Dealerships](#transferring-vehicles-between-dealerships)
-  - [Modifying Vehicle Rental Status](#modifying-vehicle-rental-status)
+  - [Modifying Vehicle Rental Status](#modifying-vehicles-rental-status)
   - [Viewing the Company's Inventory](#viewing-the-companys-inventory)
+  - [Saving Company Inventory to a File](#saving-company-inventory-to-a-file)
 - [Dealership Management](#dealership-management)
   - [Adding a New Dealership](#adding-a-new-dealership)
   - [Editing a Dealership's Name](#editing-a-dealerships-name)
   - [Changing Dealership Receiving Status](#changing-dealership-receiving-status)
   - [Changing Dealership Rental Status](#changing-dealership-rental-status)
+- [Handling Erroneous Vehicle Data](#handling-erroneous-vehicle-data)
+  - [Correcting Erroneous Vehicle Data](#correcting-erroneous-vehicle-data)
+  - [Removing Erroneous Vehicle Data](#removing-erroneous-vehicle-data)
 - [Authors](#authors)
 
 ## Overview
@@ -116,7 +120,7 @@ The program provides a graphical user interface for managing vehicles for a comp
 - If a vehicle is loaded from a file and has erroneous data, the program will display an error message indicating the issue.
 - From the main menu, select Manage Bad Inventory.
 
-1. ** Correcting Erroneous Vehicle Data**
+1. **Correcting Erroneous Vehicle Data**
     - Select the vehicle data to be modified by clicking the checkbox under the Select column.
     - Click on the field you want to modify.
     - Enter the corrected data in the provided fields.
